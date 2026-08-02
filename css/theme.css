@@ -1,0 +1,196 @@
+/* ==========================================
+   AI Contract Reviewer
+   Global Theme
+   Tokyo Night
+========================================== */
+
+:root {
+  /* ========= Colors ========= */
+
+  --bg-primary: #1a1b26;
+  --bg-secondary: #24283b;
+  --bg-hover: #2f354f;
+
+  --border-color: #414868;
+
+  --primary: #7aa2f7;
+  --primary-hover: #89b4fa;
+
+  --success: #9ece6a;
+  --warning: #e0af68;
+  --danger: #f7768e;
+
+  --text-primary: #c0caf5;
+  --text-secondary: #9aa5ce;
+  --text-muted: #6b7089;
+
+  /* ========= Radius ========= */
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* ========= Shadow ========= */
+
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+  /* ========= Transition ========= */
+
+  --transition: 0.25s ease;
+}
+
+/* ==========================================
+   Reset
+========================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ==========================================
+   Body
+========================================== */
+
+body {
+  background: var(--bg-primary);
+
+  color: var(--text-primary);
+
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+  min-height: 100vh;
+
+  line-height: 1.5;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+}
+
+/* ==========================================
+   Links
+========================================== */
+
+a {
+  color: var(--primary);
+
+  text-decoration: none;
+
+  transition: var(--transition);
+}
+
+a:hover {
+  color: var(--primary-hover);
+}
+
+/* ==========================================
+   Buttons
+========================================== */
+
+button {
+  font: inherit;
+
+  cursor: pointer;
+
+  border: none;
+
+  transition: var(--transition);
+}
+
+.btn-primary {
+  width: 100%;
+
+  padding: 14px;
+
+  border-radius: var(--radius-md);
+
+  background: var(--primary);
+
+  color: var(--bg-primary);
+
+  font-size: 1rem;
+
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+/* ==========================================
+   Inputs
+========================================== */
+
+input {
+  width: 100%;
+
+  padding: 14px;
+
+  border-radius: var(--radius-md);
+
+  border: 1px solid var(--border-color);
+
+  background: var(--bg-primary);
+
+  color: var(--text-primary);
+
+  font-size: 1rem;
+
+  outline: none;
+
+  transition: var(--transition);
+}
+
+input::placeholder {
+  color: var(--text-muted);
+}
+
+input:focus {
+  border-color: var(--primary);
+}
+
+/* ==========================================
+   Images
+========================================== */
+
+img {
+  max-width: 100%;
+
+  display: block;
+}
+
+/* ==========================================
+   Scrollbar
+========================================== */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-secondary);
+
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* ==========================================
+   Selection
+========================================== */
+
+::selection {
+  background: var(--primary);
+
+  color: var(--bg-primary);
+}
