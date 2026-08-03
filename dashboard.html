@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>AI Contract Reviewer - Dashboard</title>
+
+    <!-- Global Theme -->
+    <link rel="stylesheet" href="./css/theme.css" />
+
+    <!-- Dashboard Style -->
+    <link rel="stylesheet" href="./css/dashboard.css" />
+  </head>
+
+  <body>
+    <div class="dashboard-layout">
+      <!-- =========================
+         Sidebar
+    ========================== -->
+
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-icon">AI</div>
+
+          <h2>Contract AI</h2>
+        </div>
+
+        <nav class="sidebar-menu">
+          <a href="#" class="menu-item active"> Dashboard </a>
+
+          <a href="#" class="menu-item"> Contracts </a>
+
+          <a href="#" class="menu-item"> Upload Contract </a>
+
+          <a href="#" class="menu-item"> Analysis </a>
+
+          <a href="#" class="menu-item"> Settings </a>
+        </nav>
+      </aside>
+
+      <!-- =========================
+         Main Content
+    ========================== -->
+
+      <main class="main-content">
+        <!-- Navbar -->
+
+        <header class="top-navbar">
+          <div class="page-title">
+            <h1>Dashboard</h1>
+
+            <p>Overview of your contract intelligence workspace</p>
+          </div>
+
+          <div class="navbar-actions">
+            <button class="notification-btn">🔔</button>
+
+            <div class="user-profile">
+              <div class="avatar">P</div>
+
+              <span> User </span>
+            </div>
+          </div>
+        </header>
+
+        <!-- Dashboard Content -->
+
+        <section class="dashboard-content">
+          <!-- Statistics Cards -->
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <h3>Total Contracts</h3>
+
+              <strong id="total-contracts"> -- </strong>
+            </div>
+
+            <div class="stat-card">
+              <h3>Completed Reviews</h3>
+
+              <strong id="completed-reviews"> -- </strong>
+            </div>
+
+            <div class="stat-card">
+              <h3>Risk Alerts</h3>
+
+              <strong id="risk-alerts"> -- </strong>
+            </div>
+
+            <div class="stat-card">
+              <h3>Processing</h3>
+
+              <strong id="processing-contracts"> -- </strong>
+            </div>
+          </div>
+
+          <!-- Recent Contracts -->
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>Recent Contracts</h2>
+
+              <button>View All</button>
+            </div>
+
+            <table class="contract-table">
+              <thead>
+                <tr>
+                  <th>Contract</th>
+
+                  <th>Status</th>
+
+                  <th>Risk</th>
+
+                  <th>Date</th>
+
+                  <th>Action</th>
+                </tr>
+              </thead>
+
+              <tbody id="contract-table-body">
+                <tr>
+                  <td colspan="5" class="table-loading">
+                    Loading contracts...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
+          <!-- AI Insight -->
+
+          <section class="ai-panel">
+            <h2>AI Analysis Overview</h2>
+
+            <div class="ai-content">
+              <div>
+                <span> AI Engine </span>
+
+                <strong> Ready </strong>
+              </div>
+
+              <div>
+                <span> Analysis Status </span>
+
+                <strong> Waiting </strong>
+              </div>
+
+              <div>
+                <span> Model </span>
+
+                <strong> Not Started </strong>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="./js/api.js"></script>
+    <script src="./js/dashboard.js"></script>
+  </body>
+</html>

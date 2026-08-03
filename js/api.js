@@ -183,7 +183,20 @@ async function apiRequest(endpoint, options = {}) {
     credentials: "include",
   };
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+  let response;
+
+  try {
+    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...config,
+      signal: createTimeoutSignal(),
+    });
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("Request timed out. Please try again.");
+    }
+
+    throw new Error("Unable to connect to the server.");
+  }
 
   let data;
 
@@ -242,4 +255,31 @@ async function apiDelete(endpoint) {
       method: "DELETE",
     },
   );
+}
+// =======================================================
+// SECTION 4: REQUEST TIMEOUT
+// =======================================================
+
+const REQUEST_TIMEOUT = 10000;
+
+function createTimeoutSignal() {
+  return AbortSignal.timeout(REQUEST_TIMEOUT);
+}
+
+// =======================================================
+// SECTION 5: AUTHENTICATION HELPERS
+// =======================================================
+
+async function getCurrentUser() {
+  return await apiGet("/users/me");
+}
+async function getContracts() {
+  return await apiGet("/contracts");
+}
+// =======================================================
+// SECTION 6: LOGOUT
+// =======================================================
+
+async function logout() {
+  return await apiPost("/auth/logout");
 }

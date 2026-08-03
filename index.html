@@ -4,58 +4,76 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>AI Contract Reviewer | Login</title>
+    <title>AI Contract Reviewer - Login</title>
 
-    <link rel="stylesheet" href="css/theme.css" />
-    <link rel="stylesheet" href="css/auth.css" />
+    <!-- Global Theme -->
+    <link rel="stylesheet" href="./css/theme.css" />
+
+    <!-- Login Page Style -->
+    <link rel="stylesheet" href="./css/login.css" />
   </head>
 
   <body>
-    <main class="auth-container">
-      <section class="auth-card">
-        <div class="logo-section">
-          <h1>AI Contract Reviewer</h1>
-          <p>Sign in to continue</p>
+    <main class="login-container">
+      <!-- Branding Section -->
+
+      <section class="brand-section">
+        <div class="brand-logo">AI</div>
+
+        <h1>AI Contract Reviewer</h1>
+
+        <p>
+          Analyze contracts intelligently with AI-powered risk detection and
+          insights.
+        </p>
+
+        <div class="feature-list">
+          <span> ✓ AI Contract Analysis </span>
+
+          <span> ✓ Risk Detection </span>
+
+          <span> ✓ Smart Legal Insights </span>
+        </div>
+      </section>
+
+      <!-- Login Card -->
+
+      <section class="login-card">
+        <div class="login-header">
+          <h2>Welcome Back</h2>
+
+          <p>Login to continue your workspace</p>
         </div>
 
-        <form id="loginForm" class="auth-form">
-          <div class="form-group">
-            <label for="email">Email</label>
+        <form id="login-form">
+          <div class="input-group">
+            <label for="email"> Email </label>
 
             <input
               type="email"
               id="email"
               name="email"
               placeholder="Enter your email"
-              autocomplete="email"
               required
             />
           </div>
 
-          <div class="form-group">
-            <label for="password">Password</label>
+          <div class="input-group">
+            <label for="password"> Password </label>
 
             <input
               type="password"
               id="password"
               name="password"
               placeholder="Enter your password"
-              autocomplete="current-password"
               required
             />
           </div>
 
-          <button type="submit" id="loginButton" class="btn-primary">
-            Login
-          </button>
-        </form>
+          <button type="submit" class="login-btn" id="loginButton">Login</button>
 
-        <div class="auth-footer">
-          <p>
-            Don't have an account?
-            <a href="register.html">Register</a>
-          </p>
-        </div>
+          <p id="login-message" class="login-message"></p>
+        </form>
       </section>
     </main>
 

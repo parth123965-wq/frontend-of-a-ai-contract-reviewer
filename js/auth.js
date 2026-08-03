@@ -1,4 +1,3 @@
-console.log("auth.js loaded");
 /*
 ==================================================
 
@@ -37,7 +36,7 @@ DOM ELEMENTS
 ==================================================
 */
 
-const loginForm = document.getElementById("loginForm");
+const loginForm = document.getElementById("login-form");
 const registerForm = document.getElementById("registerForm");
 
 const loginButton = document.getElementById("loginButton");
@@ -209,21 +208,12 @@ async function loginUser(email, password) {
 // =======================================================
 
 function handleLoginSuccess(data) {
-  console.log("Login successful", data.user);
 
-  /*
-    JWT is NOT stored here.
+  console.log("Redirecting to dashboard...");
 
-    Browser already stored:
+  window.location.replace("./dashboard.html");
 
-    ai_contract_session
-
-    because it is HttpOnly.
-    */
-
-  window.location.href = "/dashboard.html";
 }
-
 // =======================================================
 // SECTION 4: LOGIN ERROR HANDLER
 // =======================================================
@@ -241,7 +231,6 @@ function handleLoginError(error) {
 async function handleLoginSubmit(event) {
   event.preventDefault();
 
-  console.log("Login submit triggered");
 
   const email = document.getElementById("email").value.trim();
 
@@ -272,29 +261,20 @@ async function handleLoginSubmit(event) {
 // SECTION 6: INITIALIZE LOGIN PAGE
 // =======================================================
 
-function initializeLogin() {
-  const loginForm = document.getElementById("loginForm");
 
-  if (loginForm) {
-    loginForm.addEventListener("submit", handleLoginSubmit);
-  }
-}
 
 // =======================================================
 // SECTION 7: START APPLICATION
 // =======================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM loaded");
 
-  const loginForm = document.getElementById("loginForm");
+  const loginForm = document.getElementById("login-form");
 
-  console.log("Login form:", loginForm);
 
   if (loginForm) {
     loginForm.addEventListener("submit", handleLoginSubmit);
 
-    console.log("Submit listener attached");
   }
 });
 // =======================================================
@@ -346,7 +326,6 @@ function validateLoginInput(email, password) {
 // =======================================================
 
 function showMessage(message, type = "error") {
-  console.log(`${type}: ${message}`);
 
   alert(message);
 }
