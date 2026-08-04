@@ -1,35 +1,55 @@
-/* =====================================================
-   AI Contract Reviewer
-   Dashboard Styling
-   Tokyo Night AI SaaS Theme
-===================================================== */
+/*
+==================================================
 
-/* =====================================================
-   Dashboard Layout
-===================================================== */
+AI Contract Reviewer
 
-.dashboard-layout {
+File:
+dashboard.css
+
+Responsibility:
+Dashboard Layout
+
+Author:
+OpenAI + Parth
+
+Theme:
+Tokyo Night AI SaaS
+
+==================================================
+*/
+
+/* ==================================================
+   DASHBOARD LAYOUT
+================================================== */
+
+.dashboard {
   min-height: 100vh;
 
   display: flex;
 
-  background: var(--bg-primary);
+  background: var(--color-bg);
 }
 
-/* =====================================================
-   Sidebar
-===================================================== */
+/* ==================================================
+   SIDEBAR
+================================================== */
 
 .sidebar {
   width: var(--sidebar-width);
 
   min-height: 100vh;
 
-  background: rgba(22, 22, 30, 0.85);
+  background: var(--color-surface);
 
-  border-right: 1px solid var(--border-soft);
+  border-right: 1px solid var(--color-border);
 
-  padding: 28px 20px;
+  padding: var(--space-6);
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: var(--space-8);
 
   position: fixed;
 
@@ -37,23 +57,25 @@
 
   top: 0;
 
-  backdrop-filter: blur(15px);
+  z-index: var(--z-fixed);
 }
+
+/* ==================================================
+   SIDEBAR BRAND
+================================================== */
 
 .sidebar-brand {
   display: flex;
 
   align-items: center;
 
-  gap: 14px;
-
-  margin-bottom: 45px;
+  gap: var(--space-3);
 }
 
-.brand-icon {
-  width: 48px;
+.sidebar-logo {
+  width: 42px;
 
-  height: 48px;
+  height: 42px;
 
   display: flex;
 
@@ -61,235 +83,150 @@
 
   justify-content: center;
 
-  border-radius: 14px;
+  border-radius: var(--radius-md);
 
-  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  background: var(--gradient-primary);
 
   color: white;
 
-  font-weight: 700;
-
-  font-size: 20px;
-
-  box-shadow: 0 0 25px rgba(122, 162, 247, 0.35);
+  font-weight: var(--weight-bold);
 }
 
-.sidebar-brand h2 {
-  font-size: 18px;
+.sidebar-title {
+  color: var(--color-text-light);
+
+  font-weight: var(--weight-semibold);
 }
 
-/* =====================================================
-   Sidebar Menu
-===================================================== */
+/* ==================================================
+   NAVIGATION
+================================================== */
 
-.sidebar-menu {
+.sidebar-nav {
   display: flex;
 
   flex-direction: column;
 
-  gap: 8px;
+  gap: var(--space-2);
 }
 
-.menu-item {
-  padding: 13px 15px;
+.nav-item {
+  display: flex;
 
-  border-radius: var(--radius-small);
+  align-items: center;
 
-  color: var(--text-secondary);
+  gap: var(--space-3);
 
-  transition: var(--transition-fast);
+  padding: var(--space-3) var(--space-4);
+
+  border-radius: var(--radius-md);
+
+  color: var(--color-text-muted);
+
+  transition: all var(--transition-normal);
 }
 
-.menu-item:hover {
-  background: var(--surface-hover);
+.nav-item:hover {
+  background: var(--color-surface-hover);
 
-  color: var(--text-primary);
+  color: var(--color-text-light);
 }
 
-.menu-item.active {
+.nav-item.active {
   background: rgba(122, 162, 247, 0.15);
 
-  color: var(--accent-blue);
-
-  border-left: 3px solid var(--accent-blue);
+  color: var(--color-primary);
 }
 
-/* =====================================================
-   Main Content
-===================================================== */
+/* ==================================================
+   MAIN AREA
+================================================== */
 
-.main-content {
+.dashboard-main {
   margin-left: var(--sidebar-width);
 
   width: calc(100% - var(--sidebar-width));
 
-  padding: 25px 35px;
+  padding: var(--space-8);
 }
 
-/* =====================================================
-   Navbar
-===================================================== */
+/* ==================================================
+   TOP BAR
+================================================== */
 
-.top-navbar {
-  height: var(--navbar-height);
-
+.dashboard-header {
   display: flex;
+
+  align-items: center;
 
   justify-content: space-between;
 
-  align-items: center;
-
-  margin-bottom: 35px;
+  margin-bottom: var(--space-8);
 }
 
-.page-title h1 {
-  font-size: 32px;
+.dashboard-header h1 {
+  font-size: var(--font-3xl);
 }
 
-.page-title p {
-  color: var(--text-secondary);
-}
-
-.navbar-actions {
-  display: flex;
-
-  align-items: center;
-
-  gap: 20px;
-}
-
-.notification-btn {
-  width: 42px;
-
-  height: 42px;
-
-  border-radius: 50%;
-
-  background: var(--surface-primary);
-
-  color: var(--text-primary);
-
-  border: 1px solid var(--border-soft);
-}
+/* ==================================================
+   USER PROFILE
+================================================== */
 
 .user-profile {
   display: flex;
 
   align-items: center;
 
-  gap: 10px;
+  gap: var(--space-3);
+
+  padding: var(--space-3) var(--space-4);
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+
+  border-radius: var(--radius-round);
 }
 
-.avatar {
-  width: 40px;
-
-  height: 40px;
-
-  border-radius: 50%;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  background: var(--accent-purple);
-
-  color: white;
-
-  font-weight: 700;
-}
-
-/* =====================================================
-   Statistics Cards
-===================================================== */
+/* ==================================================
+   STAT GRID
+================================================== */
 
 .stats-grid {
   display: grid;
 
   grid-template-columns: repeat(4, 1fr);
 
-  gap: 20px;
+  gap: var(--space-5);
 
-  margin-bottom: 30px;
+  margin-bottom: var(--space-8);
 }
 
-.stat-card {
-  padding: 25px;
+/* ==================================================
+   CONTRACT SECTION
+================================================== */
 
-  background: var(--surface-primary);
-
-  border: 1px solid var(--border-soft);
-
-  border-radius: var(--radius-medium);
-
-  box-shadow: var(--shadow-small);
-
-  transition: var(--transition-normal);
+.contract-section {
+  margin-top: var(--space-6);
 }
 
-.stat-card:hover {
-  transform: translateY(-5px);
-
-  border-color: var(--accent-blue);
-}
-
-.stat-card h3 {
-  color: var(--text-secondary);
-
-  font-size: 14px;
-
-  margin-bottom: 12px;
-}
-
-.stat-card strong {
-  font-size: 32px;
-
-  color: var(--accent-blue);
-}
-
-/* =====================================================
-   Panels
-===================================================== */
-
-.panel,
-.ai-panel {
-  background: var(--surface-primary);
-
-  border: 1px solid var(--border-soft);
-
-  border-radius: var(--radius-medium);
-
-  padding: 25px;
-
-  margin-bottom: 30px;
-
-  box-shadow: var(--shadow-small);
-}
-
-.panel-header {
+.section-header {
   display: flex;
 
   justify-content: space-between;
 
   align-items: center;
 
-  margin-bottom: 20px;
+  margin-bottom: var(--space-5);
 }
 
-.panel-header button {
-  padding: 8px 15px;
+/* ==================================================
+   TABLE CARD
+================================================== */
 
-  background: rgba(122, 162, 247, 0.15);
-
-  color: var(--accent-blue);
-
-  border-radius: 8px;
+.contract-table-card {
+  overflow: hidden;
 }
-
-/* =====================================================
-   Contract Table
-===================================================== */
 
 .contract-table {
   width: 100%;
@@ -300,124 +237,77 @@
 .contract-table th {
   text-align: left;
 
-  color: var(--text-muted);
+  padding: var(--space-4);
 
-  padding: 14px;
+  color: var(--color-text-muted);
+
+  font-size: var(--font-sm);
+
+  border-bottom: 1px solid var(--color-border);
 }
 
 .contract-table td {
-  padding: 14px;
+  padding: var(--space-4);
 
-  border-top: 1px solid var(--border-soft);
+  color: var(--color-text);
 
-  color: var(--text-secondary);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .contract-table tr:hover {
   background: rgba(122, 162, 247, 0.05);
 }
 
-/* =====================================================
-   AI Panel
-===================================================== */
+/* ==================================================
+   EMPTY STATE
+================================================== */
 
-.ai-content {
-  display: grid;
+.dashboard-empty {
+  display: flex;
 
-  grid-template-columns: repeat(3, 1fr);
+  flex-direction: column;
 
-  gap: 20px;
+  align-items: center;
+
+  justify-content: center;
+
+  padding: var(--space-10);
+
+  text-align: center;
 }
 
-.ai-content div {
-  padding: 20px;
+/* ==================================================
+   RESPONSIVE
+================================================== */
 
-  background: var(--bg-secondary);
-
-  border-radius: var(--radius-small);
-}
-
-.ai-content span {
-  display: block;
-
-  color: var(--text-muted);
-
-  margin-bottom: 8px;
-}
-
-.ai-content strong {
-  color: var(--accent-cyan);
-}
-
-/* =====================================================
-   Responsive
-===================================================== */
-
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-
-  .ai-content {
-    grid-template-columns: 1fr;
-  }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 992px) {
   .sidebar {
     display: none;
   }
 
-  .main-content {
+  .dashboard-main {
     margin-left: 0;
 
     width: 100%;
-
-    padding: 20px;
   }
+}
 
+@media (max-width: 768px) {
   .stats-grid {
     grid-template-columns: 1fr;
   }
-}
-/* =====================================================
-   Status Badges
-===================================================== */
 
-.status-badge {
-  padding: 5px 12px;
+  .dashboard-header {
+    flex-direction: column;
 
-  border-radius: 20px;
+    align-items: flex-start;
 
-  font-size: 12px;
-
-  font-weight: 600;
-}
-
-.status-completed {
-  background: rgba(158, 206, 106, 0.15);
-
-  color: var(--status-success);
-}
-
-.status-processing {
-  background: rgba(125, 207, 255, 0.15);
-
-  color: var(--status-processing);
-}
-
-.status-failed {
-  background: rgba(247, 118, 142, 0.15);
-
-  color: var(--status-danger);
-}
-
-.view-btn {
-  padding: 6px 12px;
-
-  background: rgba(122, 162, 247, 0.15);
-
-  color: var(--accent-blue);
-
-  border-radius: 8px;
+    gap: var(--space-4);
+  }
 }

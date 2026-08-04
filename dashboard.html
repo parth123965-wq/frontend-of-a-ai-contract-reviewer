@@ -11,32 +11,35 @@
     <link rel="stylesheet" href="./css/theme.css" />
 
     <!-- Dashboard Style -->
+    <link rel="stylesheet" href="./css/components/button.css" />
+    <link rel="stylesheet" href="./css/components/card.css" />
+    <link rel="stylesheet" href="./css/components/badge.css" />
     <link rel="stylesheet" href="./css/dashboard.css" />
   </head>
 
   <body>
-    <div class="dashboard-layout">
+    <div class="dashboard">
       <!-- =========================
          Sidebar
     ========================== -->
 
       <aside class="sidebar">
         <div class="sidebar-brand">
-          <div class="brand-icon">AI</div>
+          <div class="sidebar-logo">AI</div>
 
           <h2>Contract AI</h2>
         </div>
 
-        <nav class="sidebar-menu">
-          <a href="#" class="menu-item active"> Dashboard </a>
+        <nav class="sidebar-nav">
+          <a href="#" class="nav-item active"> Dashboard </a>
 
-          <a href="#" class="menu-item"> Contracts </a>
+          <a href="#" class="nav-item"> Contracts </a>
 
-          <a href="#" class="menu-item"> Upload Contract </a>
+          <a href="#" class="nav-item"> Upload Contract </a>
 
-          <a href="#" class="menu-item"> Analysis </a>
+          <a href="#" class="nav-item"> Analysis </a>
 
-          <a href="#" class="menu-item"> Settings </a>
+          <a href="#" class="nav-item"> Settings </a>
         </nav>
       </aside>
 
@@ -44,10 +47,10 @@
          Main Content
     ========================== -->
 
-      <main class="main-content">
+      <main class="dashboard-main">
         <!-- Navbar -->
 
-        <header class="top-navbar">
+        <header class="dashboard-header">
           <div class="page-title">
             <h1>Dashboard</h1>
 
@@ -67,67 +70,66 @@
 
         <!-- Dashboard Content -->
 
-        <section class="dashboard-content">
+        <section class="stats-grid">
           <!-- Statistics Cards -->
 
-          <div class="stats-grid">
-            <div class="stat-card">
-              <h3>Total Contracts</h3>
+          <div class="card stat-card">
+            <h3>Total Contracts</h3>
 
-              <strong id="total-contracts"> -- </strong>
-            </div>
+            <strong id="total-contracts"> -- </strong>
+          </div>
 
-            <div class="stat-card">
-              <h3>Completed Reviews</h3>
+          <div class="card stat-card">
+            <span class="badge status-completed"> Completed </span>
 
-              <strong id="completed-reviews"> -- </strong>
-            </div>
+            <strong id="completed-reviews"> -- </strong>
+          </div>
 
-            <div class="stat-card">
-              <h3>Risk Alerts</h3>
+          <div class="card stat-card">
+            <span class="badge badge-risk-high"> High Risk </span>
 
-              <strong id="risk-alerts"> -- </strong>
-            </div>
+            <strong id="risk-alerts"> -- </strong>
+          </div>
 
-            <div class="stat-card">
-              <h3>Processing</h3>
+          <div class="card stat-card">
+            <span class="badge status-processing"> Processing </span>
 
-              <strong id="processing-contracts"> -- </strong>
-            </div>
+            <strong id="processing-contracts"> -- </strong>
           </div>
 
           <!-- Recent Contracts -->
 
-          <section class="panel">
-            <div class="panel-header">
+          <section class="contract-section">
+            <div class="section-header">
               <h2>Recent Contracts</h2>
 
-              <button>View All</button>
+              <button class="btn btn-outline btn-sm">View All</button>
             </div>
+            <div class="card contract-table-card">
+              <table class="contract-table">
+                <thead>
+                  <tr>
+                    <th>Contract</th>
 
-            <table class="contract-table">
-              <thead>
-                <tr>
-                  <th>Contract</th>
+                    <th>Status</th>
 
-                  <th>Status</th>
+                    <th>Risk</th>
 
-                  <th>Risk</th>
+                    <th>Date</th>
 
-                  <th>Date</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
 
-                  <th>Action</th>
-                </tr>
-              </thead>
-
-              <tbody id="contract-table-body">
-                <tr>
-                  <td colspan="5" class="table-loading">
-                    Loading contracts...
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                <tbody id="contract-table-body">
+                  <tr>
+                    <td colspan="5" class="table-loading">
+                      Loading contracts...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </section>
 
           <!-- AI Insight -->

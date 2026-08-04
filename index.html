@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="./css/theme.css" />
 
     <!-- Login Page Style -->
+    <link rel="stylesheet" href="./css/components/button.css" />
+    <link rel="stylesheet" href="./css/components/card.css" />
+    <link rel="stylesheet" href="./css/components/input.css" />
     <link rel="stylesheet" href="./css/login.css" />
   </head>
 
@@ -38,7 +41,7 @@
 
       <!-- Login Card -->
 
-      <section class="login-card">
+      <section class="card card-glass login-card">
         <div class="login-header">
           <h2>Welcome Back</h2>
 
@@ -47,30 +50,30 @@
 
         <form id="login-form">
           <div class="input-group">
-            <label for="email"> Email </label>
+            <label class="input-label"> Email </label>
 
             <input
-              type="email"
+              class="input"
               id="email"
-              name="email"
+              type="email"
               placeholder="Enter your email"
-              required
             />
           </div>
 
           <div class="input-group">
-            <label for="password"> Password </label>
+            <label class="input-label"> Password </label>
 
             <input
-              type="password"
+              class="input"
               id="password"
-              name="password"
+              type="password"
               placeholder="Enter your password"
-              required
             />
           </div>
 
-          <button type="submit" class="login-btn" id="loginButton">Login</button>
+          <button type="submit" class="btn btn-primary" id="loginButton">
+            Login
+          </button>
 
           <p id="login-message" class="login-message"></p>
         </form>

@@ -300,9 +300,12 @@ function renderContractsTable(contracts) {
 
             <td>
 
-                <button class="view-btn">
+                <button 
+                  class="view-btn"
+                  onclick="viewContract(${contract.id})"
+                >
 
-                    View
+                  View
 
                 </button>
 
@@ -328,4 +331,13 @@ function getStatusBadge(status) {
             ${status}
         </span>
     `;
+}
+/*
+==================================================
+CONTRACT DETAIL NAVIGATION
+==================================================
+*/
+
+function viewContract(contractId) {
+  window.location.href = `./contract-detail.html?id=${contractId}`;
 }

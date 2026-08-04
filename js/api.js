@@ -276,6 +276,9 @@ async function getCurrentUser() {
 async function getContracts() {
   return await apiGet("/contracts");
 }
+async function getContractById(id) {
+  return await apiGet(`/contracts/${id}`);
+}
 // =======================================================
 // SECTION 6: LOGOUT
 // =======================================================

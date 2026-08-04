@@ -1,0 +1,319 @@
+/*
+==================================================
+
+AI Contract Reviewer
+
+File:
+contract-detail.css
+
+Responsibility:
+Contract Detail Page Layout
+
+Author:
+OpenAI + Parth
+
+Theme:
+Tokyo Night AI SaaS
+
+==================================================
+*/
+
+/* ==================================================
+   CONTRACT DETAIL PAGE
+================================================== */
+
+.contract-detail {
+  min-height: 100vh;
+
+  padding: var(--space-8);
+
+  background: var(--color-bg);
+}
+
+/* ==================================================
+   PAGE HEADER
+================================================== */
+
+.contract-detail-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: var(--space-5);
+
+  margin-bottom: var(--space-8);
+}
+
+.contract-title {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: var(--space-2);
+}
+
+.contract-title h1 {
+  font-size: var(--font-3xl);
+}
+
+/* ==================================================
+   HEADER ACTIONS
+================================================== */
+
+.contract-actions {
+  display: flex;
+
+  gap: var(--space-3);
+}
+
+/* ==================================================
+   INFORMATION GRID
+================================================== */
+
+.contract-info-grid {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: var(--space-5);
+
+  margin-bottom: var(--space-8);
+}
+
+/* ==================================================
+   INFO CARD
+================================================== */
+
+.info-card {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: var(--space-2);
+}
+
+.info-label {
+  color: var(--color-text-muted);
+
+  font-size: var(--font-sm);
+}
+
+.info-value {
+  color: var(--color-text-light);
+
+  font-size: var(--font-lg);
+
+  font-weight: var(--weight-semibold);
+}
+
+/* ==================================================
+   AI ANALYSIS SECTION
+================================================== */
+
+.analysis-grid {
+  display: grid;
+
+  grid-template-columns: 2fr 1fr;
+
+  gap: var(--space-6);
+}
+
+/* ==================================================
+   SUMMARY CARD
+================================================== */
+
+.summary-content {
+  color: var(--color-text);
+
+  line-height: 1.8;
+}
+
+/* ==================================================
+   RISK SCORE CARD
+================================================== */
+
+.risk-card {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  gap: var(--space-4);
+}
+
+/* ==================================================
+   RISK SCORE
+================================================== */
+
+.risk-score {
+  width: 130px;
+
+  height: 130px;
+
+  border-radius: 50%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background: rgba(247, 118, 142, 0.12);
+
+  border: 6px solid var(--color-danger);
+
+  color: var(--color-danger);
+
+  font-size: var(--font-3xl);
+
+  font-weight: var(--weight-bold);
+}
+
+/* ==================================================
+   FINDINGS
+================================================== */
+
+.findings-section {
+  margin-top: var(--space-8);
+}
+
+.finding-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: var(--space-4);
+}
+
+.finding-item {
+  padding: var(--space-5);
+
+  background: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+
+  border-radius: var(--radius-lg);
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: var(--space-4);
+}
+
+/* ==================================================
+   AI RECOMMENDATIONS
+================================================== */
+
+.recommendation-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: var(--space-3);
+}
+
+.recommendation-item {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: var(--space-3);
+
+  color: var(--color-text);
+}
+
+.recommendation-item::before {
+  content: "✓";
+
+  color: var(--color-success);
+
+  font-weight: var(--weight-bold);
+}
+
+/* ==================================================
+   PROCESSING STATE
+================================================== */
+
+.processing-card {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: var(--space-10);
+
+  text-align: center;
+}
+
+.processing-loader {
+  width: 42px;
+
+  height: 42px;
+
+  border-radius: 50%;
+
+  border: 4px solid rgba(122, 162, 247, 0.2);
+
+  border-top-color: var(--color-primary);
+
+  animation: loading-spin 1s linear infinite;
+}
+
+@keyframes loading-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==================================================
+   RESPONSIVE
+================================================== */
+
+@media (max-width: 1100px) {
+  .analysis-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .contract-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .contract-detail {
+    padding: var(--space-5);
+  }
+
+  .contract-detail-header {
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
+  .contract-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .finding-item {
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+}
