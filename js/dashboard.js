@@ -103,6 +103,91 @@ function initDashboardEvents() {
 
   const statusFilter = document.getElementById("statusFilter");
   if (statusFilter) statusFilter.addEventListener("change", applyTableFilters);
+
+  // Navigation Tab Handlers
+  const navItems = document.querySelectorAll(".sidebar-nav button[data-tab]");
+  navItems.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tabTarget = btn.getAttribute("data-tab");
+      switchTab(tabTarget);
+    });
+  });
+
+  // Re-scan Trigger in Analysis Tab
+  const triggerRescanBtn = document.getElementById("triggerRescanBtn");
+  if (triggerRescanBtn) {
+    triggerRescanBtn.addEventListener("click", async () => {
+      triggerRescanBtn.disabled = true;
+      triggerRescanBtn.textContent = "⚡ Scanning Workspace...";
+      showToast("Running neural AI clause re-scan on all active contracts...", "info");
+      setTimeout(async () => {
+        await refreshContracts();
+        triggerRescanBtn.disabled = false;
+        triggerRescanBtn.textContent = "⚡ Run Workspace Re-Scan";
+        showToast("AI clause re-scan completed!", "success");
+      }, 1500);
+    });
+  }
+
+  // Settings Form Handler
+  const settingsForm = document.getElementById("settingsForm");
+  if (settingsForm) {
+    settingsForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const usernameInput = document.getElementById("settingsUsername");
+      const apiUrlInput = document.getElementById("settingsApiUrl");
+      if (apiUrlInput && apiUrlInput.value.trim()) {
+        API_CONFIG.BASE_URL = apiUrlInput.value.trim();
+      }
+      if (usernameInput && usernameInput.value.trim()) {
+        const usernameEl = document.getElementById("username");
+        const avatarEl = document.getElementById("user-avatar");
+        const nameVal = usernameInput.value.trim();
+        if (usernameEl) usernameEl.textContent = nameVal;
+        if (avatarEl) avatarEl.textContent = nameVal.charAt(0).toUpperCase();
+      }
+      showToast("Settings saved successfully!", "success");
+    });
+  }
+}
+
+/* Tab Switcher Handler */
+function switchTab(tabName) {
+  const navItems = document.querySelectorAll(".sidebar-nav button[data-tab]");
+  navItems.forEach((btn) => {
+    if (btn.getAttribute("data-tab") === tabName) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
+
+  const pageHeading = document.getElementById("page-heading");
+  const pageSubheading = document.getElementById("page-subheading");
+
+  const tabDashboard = document.getElementById("tab-dashboard");
+  const tabAnalysis = document.getElementById("tab-analysis");
+  const tabSettings = document.getElementById("tab-settings");
+
+  if (tabDashboard) tabDashboard.style.display = (tabName === "dashboard" || tabName === "contracts") ? "block" : "none";
+  if (tabAnalysis) tabAnalysis.style.display = tabName === "analysis" ? "block" : "none";
+  if (tabSettings) tabSettings.style.display = tabName === "settings" ? "block" : "none";
+
+  if (tabName === "dashboard") {
+    if (pageHeading) pageHeading.textContent = "Dashboard";
+    if (pageSubheading) pageSubheading.textContent = "Overview of your contract intelligence workspace";
+  } else if (tabName === "contracts") {
+    if (pageHeading) pageHeading.textContent = "Contracts";
+    if (pageSubheading) pageSubheading.textContent = "Manage and filter all analyzed legal agreements";
+    const recentSec = document.getElementById("recent-contracts");
+    if (recentSec) recentSec.scrollIntoView({ behavior: "smooth" });
+  } else if (tabName === "analysis") {
+    if (pageHeading) pageHeading.textContent = "AI Analysis Engine";
+    if (pageSubheading) pageSubheading.textContent = "Neural risk detection rules & engine health metrics";
+  } else if (tabName === "settings") {
+    if (pageHeading) pageHeading.textContent = "Settings";
+    if (pageSubheading) pageSubheading.textContent = "Manage user profile, backend API URL, and risk scoring preferences";
+  }
 }
 
 /* Logout Handler */

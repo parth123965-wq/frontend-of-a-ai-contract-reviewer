@@ -370,6 +370,46 @@
   font-weight: var(--weight-medium);
 }
 
+/* Analysis Rules List */
+.analysis-rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.rule-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.rule-info strong {
+  display: block;
+  color: var(--color-text-light);
+  font-size: var(--font-sm);
+  margin-bottom: 2px;
+}
+
+.rule-info p {
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+}
+
+/* Settings Form */
+.settings-grid {
+  max-width: 800px;
+}
+
+.form-group-grid .info-label {
+  display: block;
+  margin-bottom: var(--space-2);
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .stats-grid {
