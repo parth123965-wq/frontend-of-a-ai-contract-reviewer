@@ -73,6 +73,7 @@ async function fetchAndRenderContract(contractId) {
     renderContractMetadata(contract);
     renderRiskScoreGauge(contract.risk_score);
     renderFindings(contract.key_findings);
+    renderRecommendations(contract);
   } catch (error) {
     console.error("Error loading contract details:", error);
     showToast(error.message || "Failed to load contract detail.", "error");
@@ -174,6 +175,29 @@ function renderFindings(findings) {
 
     container.appendChild(findingDiv);
   });
+}
+
+/* Render Recommendations */
+function renderRecommendations(contract) {
+  const recContainer = document.getElementById("recommendations-list");
+  if (!recContainer) return;
+
+  const score = contract.risk_score || 0;
+  const recs = [];
+
+  if (score >= 70) {
+    recs.push("Mandatory legal review recommended due to high liability exposure clauses.");
+    recs.push("Negotiate mutual liability cap (12 months contract fees) before signing.");
+    recs.push("Add explicit exclusion for indirect and consequential damages.");
+  } else if (score >= 40) {
+    recs.push("Verify auto-renewal notice timeline aligns with internal operations.");
+    recs.push("Confirm choice of law and dispute venue match corporate preferences.");
+  } else {
+    recs.push("Agreement adheres to standard legal templates and low-risk terms.");
+    recs.push("Proceed through standard executive signature workflow.");
+  }
+
+  recContainer.innerHTML = recs.map(r => `<div class="recommendation-item">${escapeHtml(r)}</div>`).join("");
 }
 
 /* Toast Helper */

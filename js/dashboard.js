@@ -190,10 +190,10 @@ function renderContractsTable(contracts) {
 
     row.innerHTML = `
       <td>
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <a href="contract-detail.html?id=${contract.id}" class="contract-file-link" title="Click to view AI contract analysis">
           <span style="font-size: 1.1rem;">📄</span>
           <strong>${escapeHtml(contract.original_filename)}</strong>
-        </div>
+        </a>
       </td>
       <td>${getStatusBadgeHtml(contract.status)}</td>
       <td>${getRiskScoreBadgeHtml(contract.risk_score)}</td>
@@ -315,10 +315,12 @@ async function handleUploadSubmit(e) {
       submitBtn.textContent = "Analyzing Contract...";
     }
 
-    await uploadContract(file);
-    showToast("Contract uploaded and analyzed!", "success");
+    const createdContract = await uploadContract(file);
     closeUploadModal();
     await refreshContracts();
+
+    const viewLink = createdContract?.id ? ` <a href="contract-detail.html?id=${createdContract.id}" style="color: var(--color-primary); font-weight: 600; text-decoration: underline; margin-left: 6px;">View Analysis →</a>` : "";
+    showToast(`Contract uploaded and analyzed!${viewLink}`, "success");
   } catch (error) {
     showToast(error.message || "Failed to upload contract.", "error");
   } finally {

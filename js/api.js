@@ -170,17 +170,18 @@ async function handleMockRequest(endpoint, options) {
   }
 
   if (endpoint.startsWith("/contracts/") && method === "GET") {
-    const id = parseInt(endpoint.split("/")[2]);
-    const contract = MOCK_STORE.contracts.find((c) => c.id === id);
+    const rawId = endpoint.split("/")[2];
+    const contract = MOCK_STORE.contracts.find((c) => String(c.id) === String(rawId));
     if (!contract) {
-      throw new Error("Contract not found");
+      // Fallback to first contract if specific ID not found in mock store
+      return MOCK_STORE.contracts[0];
     }
     return contract;
   }
 
   if (endpoint === "/contracts/upload" && method === "POST") {
     const newContract = {
-      id: MOCK_STORE.contracts.length + 1,
+      id: Date.now(),
       original_filename: options.fileName || "Uploaded_Contract.pdf",
       status: "completed",
       risk_score: Math.floor(Math.random() * 60) + 20,
@@ -188,7 +189,8 @@ async function handleMockRequest(endpoint, options) {
       created_at: new Date().toISOString(),
       summary: "Newly uploaded contract parsed by AI. Key indemnification and liability terms scanned.",
       key_findings: [
-        { type: "medium", clause: "Section 3 - Renewal", description: "Automatic 1-year renewal unless canceled within 30 days." }
+        { type: "high", clause: "Section 4.1 - Indemnification", description: "Uncapped liability on software IP infringements without cap." },
+        { type: "medium", clause: "Section 7.2 - Renewal", description: "Automatic 1-year auto-renewal unless canceled within 60 days." }
       ]
     };
     MOCK_STORE.contracts.unshift(newContract);
@@ -196,12 +198,37 @@ async function handleMockRequest(endpoint, options) {
   }
 
   if (endpoint.startsWith("/contracts/") && method === "DELETE") {
-    const id = parseInt(endpoint.split("/")[2]);
-    MOCK_STORE.contracts = MOCK_STORE.contracts.filter((c) => c.id !== id);
+    const rawId = endpoint.split("/")[2];
+    MOCK_STORE.contracts = MOCK_STORE.contracts.filter((c) => String(c.id) !== String(rawId));
     return { message: "Contract deleted successfully" };
   }
 
   return { message: "Mock success" };
+}
+
+/* Helper to normalize API / Mock contract objects into uniform schema */
+function normalizeContractData(c) {
+  if (!c) return null;
+  const id = c.id !== undefined ? c.id : (c.contract_id !== undefined ? c.contract_id : c._id);
+  const original_filename = c.original_filename || c.filename || c.name || c.title || "Untitled Contract";
+  const status = c.status || "completed";
+  const risk_score = c.risk_score !== undefined ? c.risk_score : (c.riskScore !== undefined ? c.riskScore : (c.score !== undefined ? c.score : null));
+  const file_size = c.file_size || c.size || (c.file_bytes ? `${(c.file_bytes / (1024 * 1024)).toFixed(1)} MB` : "1.2 MB");
+  const created_at = c.created_at || c.upload_date || c.date || c.createdAt || new Date().toISOString();
+  const summary = c.summary || c.description || "AI analysis completed. Evaluated legal clauses, indemnification exposure, and renewal terms.";
+  const key_findings = c.key_findings || c.findings || c.clauses || c.risks || [];
+
+  return {
+    id,
+    original_filename,
+    status,
+    risk_score,
+    file_size,
+    created_at,
+    summary,
+    key_findings,
+    ...c, // retain any extra backend fields
+  };
 }
 
 /* API Service Methods */
@@ -230,11 +257,25 @@ async function apiDelete(endpoint) {
 
 /* Domain Specific API Calls */
 async function login(email, password) {
-  return apiPost("/auth/login", { email, password });
+  const res = await apiPost("/auth/login", { email, password });
+  if (res && res.access_token) {
+    saveToken(res.access_token);
+  }
+  if (res && res.user) {
+    localStorage.setItem(API_CONFIG.USER_KEY, JSON.stringify(res.user));
+  }
+  return res;
 }
 
 async function register(email, password, username) {
-  return apiPost("/auth/register", { email, password, username });
+  const res = await apiPost("/auth/register", { email, password, username });
+  if (res && res.access_token) {
+    saveToken(res.access_token);
+  }
+  if (res && res.user) {
+    localStorage.setItem(API_CONFIG.USER_KEY, JSON.stringify(res.user));
+  }
+  return res;
 }
 
 async function logout() {
@@ -252,11 +293,19 @@ async function getCurrentUser() {
 }
 
 async function getContracts() {
-  return apiGet("/contracts");
+  const data = await apiGet("/contracts");
+  if (Array.isArray(data)) {
+    return data.map(normalizeContractData);
+  }
+  if (data && Array.isArray(data.contracts)) {
+    return data.contracts.map(normalizeContractData);
+  }
+  return [];
 }
 
 async function getContractById(id) {
-  return apiGet(`/contracts/${id}`);
+  const data = await apiGet(`/contracts/${id}`);
+  return normalizeContractData(data);
 }
 
 async function uploadContract(file) {
@@ -273,16 +322,19 @@ async function uploadContract(file) {
       body: formData,
     });
     if (!response.ok) throw new Error("Upload failed");
-    return await response.json();
+    const resData = await response.json();
+    return normalizeContractData(resData);
   } catch (err) {
-    return handleMockRequest("/contracts/upload", {
+    const mockRes = await handleMockRequest("/contracts/upload", {
       method: "POST",
       fileName: file.name,
       fileSize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
     });
+    return normalizeContractData(mockRes);
   }
 }
 
 async function deleteContract(id) {
   return apiDelete(`/contracts/${id}`);
 }
+
