@@ -1,343 +1,359 @@
-/*
-=========================================================
- DASHBOARD.JS
+/* ==========================================
+   AI Contract Reviewer - Dashboard UI Logic
+========================================== */
 
- Dashboard Page Logic
-
- Responsibilities:
- - Logout
- - Load current user
- - Dashboard initialization
-
-=========================================================
-*/
-const dashboardElements = {
-  username: document.getElementById("username"),
-
-  totalContracts: document.getElementById("total-contracts"),
-
-  completedReviews: document.getElementById("completed-reviews"),
-
-  riskAlerts: document.getElementById("risk-alerts"),
-
-  processingContracts: document.getElementById("processing-contracts"),
-
-  contractTable: document.getElementById("contract-table-body"),
-};
-
-// =======================================================
-// SECTION 1: LOGOUT BUTTON
-// =======================================================
-
-async function handleLogout() {
-  try {
-    await logout();
-
-    window.location.replace("./index.html");
-  } catch (error) {
-    alert(error.message);
-  }
-}
-
-// =======================================================
-// SECTION 2: INITIALIZATION
-// =======================================================
+let allContracts = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const user = await checkAuthentication();
+  const user = await checkAuth();
+  if (!user) return;
 
-  if (!user) {
-    return;
-  }
-
-  const logoutButton = document.getElementById("logoutButton");
-
-  if (logoutButton) {
-    logoutButton.addEventListener("click", handleLogout);
-  }
+  renderUserInfo(user);
+  initDashboardEvents();
+  await refreshContracts();
 });
-// =======================================================
-// SECTION 1: AUTHENTICATION CHECK
-// =======================================================
 
-async function checkAuthentication() {
+/* Authentication Check */
+async function checkAuth() {
   try {
     const user = await getCurrentUser();
-
+    if (!user) throw new Error("No active session");
     return user;
   } catch (error) {
-    window.location.replace("./index.html");
-
-    return null;
-  }
-}
-/*
-==================================================
-
-AI Contract Reviewer
-
-File:
-dashboard.js
-
-Responsibility:
-Dashboard UI Logic
-
-Author:
-OpenAI + Parth
-
-==================================================
-*/
-
-/*
-==================================================
-CONFIGURATION
-==================================================
-*/
-
-const LOGIN_PAGE = "./index.html";
-
-/*
-==================================================
-DOM ELEMENTS
-==================================================
-*/
-
-/*
-==================================================
-AUTHENTICATION CHECK
-==================================================
-*/
-
-async function checkAuthentication() {
-  try {
-    console.log("Checking dashboard authentication...");
-
-    const user = await getCurrentUser();
-
-    console.log("Current user:", user);
-
-    return user;
-  } catch (error) {
-    console.error("Authentication failed:", error);
-
-    window.location.replace(LOGIN_PAGE);
-
+    console.warn("User authentication required:", error.message);
+    window.location.replace("index.html");
     return null;
   }
 }
 
-/*
-==================================================
-LOAD USER INFORMATION
-==================================================
-*/
+/* User Info Rendering */
+function renderUserInfo(user) {
+  const usernameEl = document.getElementById("username");
+  const avatarEl = document.getElementById("user-avatar");
 
-function renderUser(user) {
-  if (!user) {
-    return;
+  const displayName = user.username || user.email?.split("@")[0] || "User";
+
+  if (usernameEl) usernameEl.textContent = displayName;
+  if (avatarEl) avatarEl.textContent = displayName.charAt(0).toUpperCase();
+}
+
+/* Initialize Dashboard Event Listeners */
+function initDashboardEvents() {
+  // Logout Buttons
+  const logoutBtn = document.getElementById("logoutButton");
+  if (logoutBtn) logoutBtn.addEventListener("click", handleUserLogout);
+
+  const sidebarLogoutBtn = document.getElementById("sidebarLogoutBtn");
+  if (sidebarLogoutBtn) sidebarLogoutBtn.addEventListener("click", handleUserLogout);
+
+  // Upload Modal Triggers
+  const openUploadBtn = document.getElementById("openUploadBtn");
+  if (openUploadBtn) openUploadBtn.addEventListener("click", openUploadModal);
+
+  const sidebarUploadBtn = document.getElementById("sidebarUploadBtn");
+  if (sidebarUploadBtn) sidebarUploadBtn.addEventListener("click", openUploadModal);
+
+  const closeUploadModalBtn = document.getElementById("closeUploadModalBtn");
+  if (closeUploadModalBtn) closeUploadModalBtn.addEventListener("click", closeUploadModal);
+
+  const cancelUploadBtn = document.getElementById("cancelUploadBtn");
+  if (cancelUploadBtn) cancelUploadBtn.addEventListener("click", closeUploadModal);
+
+  const uploadModal = document.getElementById("uploadModal");
+  if (uploadModal) {
+    uploadModal.addEventListener("click", (e) => {
+      if (e.target === uploadModal) closeUploadModal();
+    });
   }
 
-  if (dashboardElements.username) {
-    dashboardElements.username.textContent = user.username;
+  // File Upload Handlers
+  const fileDropZone = document.getElementById("fileDropZone");
+  const fileInput = document.getElementById("contractFileInput");
+
+  if (fileDropZone && fileInput) {
+    fileDropZone.addEventListener("click", () => fileInput.click());
+
+    fileDropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      fileDropZone.style.borderColor = "var(--color-primary)";
+    });
+
+    fileDropZone.addEventListener("dragleave", () => {
+      fileDropZone.style.borderColor = "var(--color-border)";
+    });
+
+    fileDropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      fileDropZone.style.borderColor = "var(--color-border)";
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        handleFileSelection();
+      }
+    });
+
+    fileInput.addEventListener("change", handleFileSelection);
+  }
+
+  const uploadForm = document.getElementById("uploadForm");
+  if (uploadForm) uploadForm.addEventListener("submit", handleUploadSubmit);
+
+  // Search & Filter Listeners
+  const searchInput = document.getElementById("contractSearch");
+  if (searchInput) searchInput.addEventListener("input", applyTableFilters);
+
+  const statusFilter = document.getElementById("statusFilter");
+  if (statusFilter) statusFilter.addEventListener("change", applyTableFilters);
+}
+
+/* Logout Handler */
+async function handleUserLogout() {
+  try {
+    await logout();
+  } catch (error) {
+    window.location.href = "index.html";
   }
 }
 
-/*
-==================================================
-DASHBOARD INITIALIZATION
-==================================================
-*/
-
-async function initializeDashboard() {
-  const user = await checkAuthentication();
-
-  if (!user) {
-    return;
-  }
-
-  renderUser(user);
-
-  await loadContracts();
-
-  console.log("Dashboard initialized");
-}
-
-/*
-==================================================
-APPLICATION START
-==================================================
-*/
-
-document.addEventListener("DOMContentLoaded", () => {
-  initializeDashboard();
-});
-/*
-==================================================
-CONTRACT DATA
-==================================================
-*/
-
-async function loadContracts() {
+/* Load Contracts Data */
+async function refreshContracts() {
   try {
     const contracts = await getContracts();
+    allContracts = Array.isArray(contracts) ? contracts : [];
 
-    console.log("Contracts:", contracts);
-
-    renderStatistics(contracts);
-
-    renderContractsTable(contracts);
+    renderStatistics(allContracts);
+    applyTableFilters();
   } catch (error) {
-    console.error("Failed loading contracts:", error);
+    console.error("Failed to load contracts:", error);
+    showToast("Failed to load contracts.", "error");
   }
 }
-/*
-==================================================
-STATISTICS
-==================================================
-*/
 
+/* Statistics Calculation */
 function renderStatistics(contracts) {
+  const totalEl = document.getElementById("total-contracts");
+  const completedEl = document.getElementById("completed-reviews");
+  const riskEl = document.getElementById("risk-alerts");
+  const processingEl = document.getElementById("processing-contracts");
+
   const total = contracts.length;
+  const completed = contracts.filter((c) => c.status === "completed").length;
+  const processing = contracts.filter((c) => c.status === "processing").length;
+  const highRisk = contracts.filter((c) => c.risk_score && c.risk_score >= 70).length;
 
-  const completed = contracts.filter(
-    (contract) => contract.status === "completed",
-  ).length;
-
-  const processing = contracts.filter(
-    (contract) => contract.status === "processing",
-  ).length;
-
-  const risk = contracts.filter(
-    (contract) => contract.risk_score && contract.risk_score > 70,
-  ).length;
-
-  if (dashboardElements.totalContracts) {
-    dashboardElements.totalContracts.textContent = total;
-  }
-
-  if (dashboardElements.completedReviews) {
-    dashboardElements.completedReviews.textContent = completed;
-  }
-
-  if (dashboardElements.processingContracts) {
-    dashboardElements.processingContracts.textContent = processing;
-  }
-
-  if (dashboardElements.riskAlerts) {
-    dashboardElements.riskAlerts.textContent = risk;
-  }
+  if (totalEl) totalEl.textContent = total;
+  if (completedEl) completedEl.textContent = completed;
+  if (riskEl) riskEl.textContent = highRisk;
+  if (processingEl) processingEl.textContent = processing;
 }
-/*
-==================================================
-CONTRACT TABLE
-==================================================
-*/
 
+/* Table Search & Filter */
+function applyTableFilters() {
+  const searchInput = document.getElementById("contractSearch");
+  const statusFilter = document.getElementById("statusFilter");
+
+  const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : "";
+  const selectedStatus = statusFilter ? statusFilter.value : "all";
+
+  const filtered = allContracts.filter((contract) => {
+    const matchesSearch = contract.original_filename?.toLowerCase().includes(searchTerm);
+    const matchesStatus = selectedStatus === "all" || contract.status === selectedStatus;
+    return matchesSearch && matchesStatus;
+  });
+
+  renderContractsTable(filtered);
+}
+
+/* Render Contracts Table Rows */
 function renderContractsTable(contracts) {
-  const table = dashboardElements.contractTable;
+  const tableBody = document.getElementById("contract-table-body");
+  if (!tableBody) return;
 
-  if (!table) {
-    return;
-  }
-
-  table.innerHTML = "";
+  tableBody.innerHTML = "";
 
   if (!contracts.length) {
-    table.innerHTML = `
-
-        <tr>
-
-            <td colspan="5">
-
-                No contracts uploaded yet
-
-            </td>
-
-        </tr>
-
-        `;
-
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align: center; padding: 2.5rem; color: var(--color-text-muted);">
+          📄 No contracts found matching your filters.
+        </td>
+      </tr>
+    `;
     return;
   }
 
   contracts.forEach((contract) => {
     const row = document.createElement("tr");
 
+    const createdDate = contract.created_at
+      ? new Date(contract.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+      : "N/A";
+
     row.innerHTML = `
+      <td>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.1rem;">📄</span>
+          <strong>${escapeHtml(contract.original_filename)}</strong>
+        </div>
+      </td>
+      <td>${getStatusBadgeHtml(contract.status)}</td>
+      <td>${getRiskScoreBadgeHtml(contract.risk_score)}</td>
+      <td>${createdDate}</td>
+      <td>
+        <div class="table-action-btns">
+          <button class="btn btn-outline btn-sm btn-icon-sm" onclick="viewContract(${contract.id})">
+            👁️ View
+          </button>
+          <button class="btn btn-ghost btn-sm btn-icon-sm" onclick="confirmDeleteContract(${contract.id})" title="Delete contract">
+            🗑️
+          </button>
+        </div>
+      </td>
+    `;
 
-
-            <td>
-
-                ${contract.original_filename}
-
-            </td>
-
-
-
-            <td>
-
-                ${getStatusBadge(contract.status)}
-
-            </td>
-
-
-
-            <td>
-
-                ${contract.risk_score ?? "N/A"}
-
-            </td>
-
-
-
-            <td>
-
-                ${new Date(contract.created_at).toLocaleDateString()}
-
-            </td>
-
-
-
-            <td>
-
-                <button 
-                  class="view-btn"
-                  onclick="viewContract(${contract.id})"
-                >
-
-                  View
-
-                </button>
-
-            </td>
-
-
-        `;
-
-    table.appendChild(row);
+    tableBody.appendChild(row);
   });
 }
-/*
-==================================================
-STATUS BADGE
-==================================================
-*/
 
-function getStatusBadge(status) {
-  const normalized = status.toLowerCase();
+/* Status & Risk Helpers */
+function getStatusBadgeHtml(status) {
+  const norm = (status || "processing").toLowerCase();
+  let badgeClass = "badge-warning";
+  if (norm === "completed") badgeClass = "status-completed";
+  if (norm === "failed") badgeClass = "status-failed";
 
-  return `
-        <span class="status-badge status-${normalized}">
-            ${status}
-        </span>
-    `;
+  return `<span class="badge ${badgeClass}">${status}</span>`;
 }
-/*
-==================================================
-CONTRACT DETAIL NAVIGATION
-==================================================
-*/
 
-function viewContract(contractId) {
-  window.location.href = `./contract-detail.html?id=${contractId}`;
+function getRiskScoreBadgeHtml(score) {
+  if (score === null || score === undefined) {
+    return `<span class="badge badge-outline">N/A</span>`;
+  }
+
+  let badgeClass = "badge-risk-low";
+  let label = `${score}/100`;
+
+  if (score >= 70) {
+    badgeClass = "badge-risk-high";
+    label = `🔥 ${score}/100`;
+  } else if (score >= 40) {
+    badgeClass = "badge-risk-medium";
+    label = `⚠️ ${score}/100`;
+  }
+
+  return `<span class="badge ${badgeClass}">${label}</span>`;
+}
+
+/* Navigation Actions */
+function viewContract(id) {
+  window.location.href = `contract-detail.html?id=${id}`;
+}
+
+async function confirmDeleteContract(id) {
+  if (confirm("Are you sure you want to delete this contract?")) {
+    try {
+      await deleteContract(id);
+      showToast("Contract deleted successfully.", "info");
+      await refreshContracts();
+    } catch (err) {
+      showToast("Failed to delete contract.", "error");
+    }
+  }
+}
+
+/* Upload Modal Handlers */
+function openUploadModal() {
+  const modal = document.getElementById("uploadModal");
+  if (modal) modal.classList.add("active");
+}
+
+function closeUploadModal() {
+  const modal = document.getElementById("uploadModal");
+  const fileInput = document.getElementById("contractFileInput");
+  const selectedInfo = document.getElementById("selectedFileName");
+  const submitBtn = document.getElementById("uploadSubmitBtn");
+
+  if (modal) modal.classList.remove("active");
+  if (fileInput) fileInput.value = "";
+  if (selectedInfo) {
+    selectedInfo.style.display = "none";
+    selectedInfo.textContent = "";
+  }
+  if (submitBtn) submitBtn.disabled = true;
+}
+
+function handleFileSelection() {
+  const fileInput = document.getElementById("contractFileInput");
+  const selectedInfo = document.getElementById("selectedFileName");
+  const submitBtn = document.getElementById("uploadSubmitBtn");
+
+  if (fileInput && fileInput.files.length) {
+    const file = fileInput.files[0];
+    if (selectedInfo) {
+      selectedInfo.style.display = "block";
+      selectedInfo.textContent = `Selected: ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+    }
+    if (submitBtn) submitBtn.disabled = false;
+  }
+}
+
+async function handleUploadSubmit(e) {
+  e.preventDefault();
+
+  const fileInput = document.getElementById("contractFileInput");
+  const submitBtn = document.getElementById("uploadSubmitBtn");
+
+  if (!fileInput || !fileInput.files.length) {
+    showToast("Please select a file to upload.", "error");
+    return;
+  }
+
+  const file = fileInput.files[0];
+
+  try {
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Analyzing Contract...";
+    }
+
+    await uploadContract(file);
+    showToast("Contract uploaded and analyzed!", "success");
+    closeUploadModal();
+    await refreshContracts();
+  } catch (error) {
+    showToast(error.message || "Failed to upload contract.", "error");
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Analyze Contract";
+    }
+  }
+}
+
+/* Toast helper fallback */
+function showToast(message, type = "info") {
+  let container = document.getElementById("toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toast-container";
+    container.className = "toast-container";
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<span>${type === 'error' ? '⚠️' : '✓'}</span> <div>${message}</div>`;
+
+  container.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add("show"));
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
 }

@@ -1,133 +1,36 @@
-/*
-==================================================
+/* ==========================================
+   AI Contract Reviewer - Authentication Handler
+========================================== */
 
-AI Contract Reviewer
+document.addEventListener("DOMContentLoaded", () => {
+  initPasswordToggles();
 
-File:
-auth.js
-
-Responsibility:
-Authentication Logic
-
-Author:
-OpenAI + Parth
-
-==================================================
-*/
-
-/*
-==================================================
-CONFIGURATION
-==================================================
-*/
-
-const DASHBOARD_PAGE = "dashboard.html";
-const LOGIN_PAGE = "index.html";
-const REGISTER_PAGE = "register.html";
-
-const BUTTON_DEFAULT_TEXT = {
-  login: "Login",
-  register: "Register",
-};
-
-/*
-==================================================
-DOM ELEMENTS
-==================================================
-*/
-
-const loginForm = document.getElementById("login-form");
-const registerForm = document.getElementById("registerForm");
-
-const loginButton = document.getElementById("loginButton");
-const registerButton = document.getElementById("registerButton");
-
-/*
-==================================================
-UTILITY FUNCTIONS
-==================================================
-*/
-
-function getInputValue(id) {
-  const element = document.getElementById(id);
-
-  return element ? element.value.trim() : "";
-}
-
-function clearInput(id) {
-  const element = document.getElementById(id);
-
-  if (element) {
-    element.value = "";
-  }
-}
-
-function clearForm(form) {
-  if (form) {
-    form.reset();
-  }
-}
-
-/*
-==================================================
-VALIDATION
-==================================================
-*/
-
-function validateEmail(email) {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  return emailRegex.test(email);
-}
-
-function validatePassword(password) {
-  return password.length >= 8;
-}
-
-function passwordsMatch(password, confirmPassword) {
-  return password === confirmPassword;
-}
-
-/*
-==================================================
-BUTTON STATE
-==================================================
-*/
-
-function setButtonLoading(button, loadingText) {
-  if (!button) {
-    return;
+  const loginForm = document.getElementById("login-form");
+  if (loginForm) {
+    loginForm.addEventListener("submit", handleLoginSubmit);
   }
 
-  button.disabled = true;
+  const registerForm = document.getElementById("registerForm");
+  if (registerForm) {
+    registerForm.addEventListener("submit", handleRegisterSubmit);
+  }
+});
 
-  button.textContent = loadingText;
-}
-
-function resetButton(button, defaultText) {
-  if (!button) {
-    return;
+/* Toast Notification Utility */
+function showToast(message, type = "info") {
+  let container = document.getElementById("toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toast-container";
+    container.className = "toast-container";
+    document.body.appendChild(container);
   }
 
-  button.disabled = false;
-
-  button.textContent = defaultText;
-}
-
-/*
-==================================================
-TOAST MESSAGE
-==================================================
-*/
-
-function showToast(message, type = "success") {
   const toast = document.createElement("div");
-
   toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<span>${type === 'error' ? '⚠️' : '✓'}</span> <div>${message}</div>`;
 
-  toast.textContent = message;
-
-  document.body.appendChild(toast);
+  container.appendChild(toast);
 
   requestAnimationFrame(() => {
     toast.classList.add("show");
@@ -135,197 +38,136 @@ function showToast(message, type = "success") {
 
   setTimeout(() => {
     toast.classList.remove("show");
-
-    setTimeout(() => {
-      toast.remove();
-    }, 300);
-  }, 3000);
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
 }
 
-/*
-==================================================
-REDIRECTION
-==================================================
-*/
+/* Password Toggle Handler */
+function initPasswordToggles() {
+  const togglePassBtn = document.getElementById("togglePassword");
+  if (togglePassBtn) {
+    togglePassBtn.addEventListener("click", () => {
+      const input = document.getElementById("password");
+      if (input) {
+        const type = input.getAttribute("type") === "password" ? "text" : "password";
+        input.setAttribute("type", type);
+        togglePassBtn.textContent = type === "password" ? "👁️" : "🙈";
+      }
+    });
+  }
 
-function redirectToDashboard() {
-  window.location.href = DASHBOARD_PAGE;
+  const toggleRegPassBtn = document.getElementById("toggleRegPassword");
+  if (toggleRegPassBtn) {
+    toggleRegPassBtn.addEventListener("click", () => {
+      const input = document.getElementById("register-password");
+      if (input) {
+        const type = input.getAttribute("type") === "password" ? "text" : "password";
+        input.setAttribute("type", type);
+        toggleRegPassBtn.textContent = type === "password" ? "👁️" : "🙈";
+      }
+    });
+  }
 }
 
-function redirectToLogin() {
-  window.location.href = LOGIN_PAGE;
+/* Input Validations */
+function validateEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function redirectToRegister() {
-  window.location.href = REGISTER_PAGE;
-}
-
-/*
-=========================================================
- AUTH.JS
-
- Part 2: Login Authentication
-
- Responsibilities:
- - Connect login form
- - Send credentials to FastAPI
- - Handle HttpOnly cookie authentication
- - Handle success response
- - Handle errors
-
- Authentication:
- - Cookie: ai_contract_session
-
- JWT Handling:
- - Managed by browser
- - Not accessible from JavaScript
-
-=========================================================
-*/
-
-// =======================================================
-// SECTION 1: API CONFIGURATION
-// =======================================================
-
-
-// =======================================================
-// SECTION 2: LOGIN API REQUEST
-// =======================================================
-
-async function loginUser(email, password) {
-  return await apiPost(
-    "/auth/login",
-
-    {
-      email,
-      password,
-    },
-  );
-}
-
-// =======================================================
-// SECTION 3: LOGIN SUCCESS HANDLER
-// =======================================================
-
-function handleLoginSuccess(data) {
-
-  console.log("Redirecting to dashboard...");
-
-  window.location.replace("./dashboard.html");
-
-}
-// =======================================================
-// SECTION 4: LOGIN ERROR HANDLER
-// =======================================================
-
-function handleLoginError(error) {
-  console.error(error.message);
-
-  showMessage(error.message, "error");
-}
-
-// =======================================================
-// SECTION 5: LOGIN FORM SUBMISSION
-// =======================================================
-
+/* Login Submit Handler */
 async function handleLoginSubmit(event) {
   event.preventDefault();
 
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const submitBtn = document.getElementById("loginButton");
 
-  const email = document.getElementById("email").value.trim();
+  const email = emailInput ? emailInput.value.trim() : "";
+  const password = passwordInput ? passwordInput.value : "";
 
-  const password = document.getElementById("password").value;
+  if (!email || !password) {
+    showToast("Please enter both email and password.", "error");
+    return;
+  }
 
-  const validation = validateLoginInput(email, password);
-
-  if (!validation.valid) {
-    handleLoginError(new Error(validation.message));
-
+  if (!validateEmail(email)) {
+    showToast("Please enter a valid email address.", "error");
     return;
   }
 
   try {
-    setLoginLoading(true);
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Signing In...";
+    }
 
-    const data = await loginUser(email, password);
+    await login(email, password);
+    showToast("Login successful! Redirecting...", "success");
 
-    handleLoginSuccess(data);
+    setTimeout(() => {
+      window.location.href = "dashboard.html";
+    }, 600);
   } catch (error) {
-    handleLoginError(error);
-  } finally {
-    setLoginLoading(false);
+    showToast(error.message || "Failed to sign in. Please try again.", "error");
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Sign In";
+    }
   }
 }
 
-// =======================================================
-// SECTION 6: INITIALIZE LOGIN PAGE
-// =======================================================
+/* Register Submit Handler */
+async function handleRegisterSubmit(event) {
+  event.preventDefault();
 
+  const usernameInput = document.getElementById("username");
+  const emailInput = document.getElementById("register-email");
+  const passwordInput = document.getElementById("register-password");
+  const confirmPasswordInput = document.getElementById("confirm-password");
+  const submitBtn = document.getElementById("registerButton");
 
+  const username = usernameInput ? usernameInput.value.trim() : "";
+  const email = emailInput ? emailInput.value.trim() : "";
+  const password = passwordInput ? passwordInput.value : "";
+  const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : "";
 
-// =======================================================
-// SECTION 7: START APPLICATION
-// =======================================================
-
-document.addEventListener("DOMContentLoaded", () => {
-
-  const loginForm = document.getElementById("login-form");
-
-
-  if (loginForm) {
-    loginForm.addEventListener("submit", handleLoginSubmit);
-
-  }
-});
-// =======================================================
-// SECTION 8: BUTTON LOADING STATE
-// =======================================================
-
-function setLoginLoading(isLoading) {
-  const button = document.getElementById("loginButton");
-
-  if (!button) {
+  if (!username || !email || !password || !confirmPassword) {
+    showToast("Please fill in all required fields.", "error");
     return;
   }
 
-  if (isLoading) {
-    button.disabled = true;
-
-    button.textContent = "Logging in...";
-  } else {
-    button.disabled = false;
-
-    button.textContent = "Login";
-  }
-}
-// =======================================================
-// SECTION 9: LOGIN VALIDATION
-// =======================================================
-
-function validateLoginInput(email, password) {
-  if (!email || !password) {
-    return {
-      valid: false,
-      message: "Email and password are required",
-    };
+  if (!validateEmail(email)) {
+    showToast("Please enter a valid email address.", "error");
+    return;
   }
 
   if (password.length < 8) {
-    return {
-      valid: false,
-      message: "Password must contain at least 8 characters",
-    };
+    showToast("Password must be at least 8 characters long.", "error");
+    return;
   }
 
-  return {
-    valid: true,
-  };
-}
-// =======================================================
-// SECTION 10: MESSAGE HANDLER
-// =======================================================
+  if (password !== confirmPassword) {
+    showToast("Passwords do not match.", "error");
+    return;
+  }
 
-function showMessage(message, type = "error") {
+  try {
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Creating Account...";
+    }
 
-  alert(message);
+    await register(email, password, username);
+    showToast("Account created successfully! Redirecting...", "success");
+
+    setTimeout(() => {
+      window.location.href = "dashboard.html";
+    }, 600);
+  } catch (error) {
+    showToast(error.message || "Registration failed. Please try again.", "error");
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Create Account";
+    }
+  }
 }

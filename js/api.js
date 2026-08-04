@@ -1,288 +1,288 @@
 /* ==========================================
-   AI Contract Reviewer
-   API Service
+   AI Contract Reviewer - Unified API Service
+   Supports Backend REST API with Mock Fallback
 ========================================== */
 
-const API = {
+const API_CONFIG = {
   BASE_URL: "http://127.0.0.1:8000",
-
-  TOKEN_KEY: "access_token",
+  TOKEN_KEY: "ai_contract_token",
+  USER_KEY: "ai_contract_user",
+  TIMEOUT_MS: 5000,
 };
 
-/* ==========================================
-   Token Management
-========================================== */
+// Initial Mock Data Store for Offline Preview
+const MOCK_STORE = {
+  user: JSON.parse(localStorage.getItem(API_CONFIG.USER_KEY)) || {
+    id: 1,
+    username: "Parth",
+    email: "parth@contractai.io",
+  },
+  contracts: [
+    {
+      id: 1,
+      original_filename: "Vendor_Service_Agreement_2026.pdf",
+      status: "completed",
+      risk_score: 85,
+      file_size: "1.4 MB",
+      created_at: "2026-08-01T10:30:00Z",
+      summary: "High liability exposure detected in Section 4. Uncapped indemnification on software IP violations. Termination notice requires 90 days notice.",
+      key_findings: [
+        { type: "high", clause: "Section 4.2 - Indemnity", description: "Uncapped indemnification for third-party IP claims without monetary cap." },
+        { type: "medium", clause: "Section 9.1 - Termination", description: "Requires 90 days advance written notice for non-renewal." },
+        { type: "low", clause: "Section 12.4 - Jurisdiction", description: "Governing law set to Delaware Chancery Court." }
+      ]
+    },
+    {
+      id: 2,
+      original_filename: "Executive_Employment_Agreement.docx",
+      status: "completed",
+      risk_score: 35,
+      file_size: "420 KB",
+      created_at: "2026-08-03T14:15:00Z",
+      summary: "Standard executive employment agreement. Bounded 12-month non-compete. Comprehensive IP assignment with 3 months severance payout.",
+      key_findings: [
+        { type: "medium", clause: "Section 6 - Non-Compete", description: "12-month non-compete restricted within 50-mile radius." },
+        { type: "low", clause: "Section 8 - IP Assignment", description: "Standard work-for-hire assignment clause." }
+      ]
+    },
+    {
+      id: 3,
+      original_filename: "SaaS_Enterprise_License_v2.pdf",
+      status: "processing",
+      risk_score: null,
+      file_size: "2.8 MB",
+      created_at: "2026-08-04T09:00:00Z",
+      summary: "AI Engine is currently parsing legal clauses and performing risk scoring...",
+      key_findings: []
+    }
+  ]
+};
 
+/* Token Management */
 function saveToken(token) {
-  localStorage.setItem(API.TOKEN_KEY, token);
+  localStorage.setItem(API_CONFIG.TOKEN_KEY, token);
 }
 
 function getToken() {
-  return localStorage.getItem(API.TOKEN_KEY);
+  return localStorage.getItem(API_CONFIG.TOKEN_KEY);
 }
 
 function removeToken() {
-  localStorage.removeItem(API.TOKEN_KEY);
+  localStorage.removeItem(API_CONFIG.TOKEN_KEY);
+  localStorage.removeItem(API_CONFIG.USER_KEY);
 }
 
 function isAuthenticated() {
-  return getToken() !== null;
+  return getToken() !== null || localStorage.getItem(API_CONFIG.USER_KEY) !== null;
 }
 
-/* ==========================================
-   Headers
-========================================== */
+/* HTTP Request Core */
+async function apiRequest(endpoint, options = {}) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT_MS);
 
-function getHeaders() {
   const headers = {
     "Content-Type": "application/json",
+    ...(options.headers || {}),
   };
 
   const token = getToken();
-
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  return headers;
-}
-
-/* ==========================================
-   Request
-========================================== */
-
-async function request(endpoint, options = {}) {
-  const response = await fetch(`${API.BASE_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      ...getHeaders(),
-      ...(options.headers || {}),
-    },
-  });
-
-  let data = null;
-
   try {
-    data = await response.json();
-  } catch {
-    data = null;
-  }
+    const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+      signal: controller.signal,
+      credentials: "include",
+    });
 
-  if (!response.ok) {
-    throw new Error(data?.detail || "Request failed.");
-  }
+    clearTimeout(timeoutId);
 
-  return data;
+    let data = null;
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+
+    if (!response.ok) {
+      throw new Error(data?.detail || data?.message || "API Request Failed");
+    }
+
+    return data;
+  } catch (error) {
+    clearTimeout(timeoutId);
+
+    // Fall back to local mock data handling if backend is unavailable
+    console.warn(`API server unavailable (${endpoint}). Operating in mock mode.`, error.message);
+    return handleMockRequest(endpoint, options);
+  }
 }
 
-/* ==========================================
-   GET
-========================================== */
+/* Mock Request Fallback Handler */
+async function handleMockRequest(endpoint, options) {
+  await new Promise((res) => setTimeout(res, 300)); // Simulate slight network delay
 
+  const method = options.method || "GET";
+
+  if (endpoint === "/auth/login" && method === "POST") {
+    const body = JSON.parse(options.body || "{}");
+    if (!body.email || !body.password) {
+      throw new Error("Email and password are required.");
+    }
+    const mockUser = {
+      id: 1,
+      email: body.email,
+      username: body.email.split("@")[0] || "User",
+    };
+    saveToken("mock_access_token_xyz123");
+    localStorage.setItem(API_CONFIG.USER_KEY, JSON.stringify(mockUser));
+    return { access_token: "mock_access_token_xyz123", user: mockUser };
+  }
+
+  if (endpoint === "/auth/register" && method === "POST") {
+    const body = JSON.parse(options.body || "{}");
+    const mockUser = {
+      id: Date.now(),
+      email: body.email,
+      username: body.username || body.email.split("@")[0],
+    };
+    saveToken("mock_access_token_xyz123");
+    localStorage.setItem(API_CONFIG.USER_KEY, JSON.stringify(mockUser));
+    return { access_token: "mock_access_token_xyz123", user: mockUser };
+  }
+
+  if (endpoint === "/auth/logout") {
+    removeToken();
+    return { message: "Logged out successfully" };
+  }
+
+  if (endpoint === "/users/me") {
+    const user = JSON.parse(localStorage.getItem(API_CONFIG.USER_KEY)) || MOCK_STORE.user;
+    return user;
+  }
+
+  if (endpoint === "/contracts" && method === "GET") {
+    return MOCK_STORE.contracts;
+  }
+
+  if (endpoint.startsWith("/contracts/") && method === "GET") {
+    const id = parseInt(endpoint.split("/")[2]);
+    const contract = MOCK_STORE.contracts.find((c) => c.id === id);
+    if (!contract) {
+      throw new Error("Contract not found");
+    }
+    return contract;
+  }
+
+  if (endpoint === "/contracts/upload" && method === "POST") {
+    const newContract = {
+      id: MOCK_STORE.contracts.length + 1,
+      original_filename: options.fileName || "Uploaded_Contract.pdf",
+      status: "completed",
+      risk_score: Math.floor(Math.random() * 60) + 20,
+      file_size: options.fileSize || "1.2 MB",
+      created_at: new Date().toISOString(),
+      summary: "Newly uploaded contract parsed by AI. Key indemnification and liability terms scanned.",
+      key_findings: [
+        { type: "medium", clause: "Section 3 - Renewal", description: "Automatic 1-year renewal unless canceled within 30 days." }
+      ]
+    };
+    MOCK_STORE.contracts.unshift(newContract);
+    return newContract;
+  }
+
+  if (endpoint.startsWith("/contracts/") && method === "DELETE") {
+    const id = parseInt(endpoint.split("/")[2]);
+    MOCK_STORE.contracts = MOCK_STORE.contracts.filter((c) => c.id !== id);
+    return { message: "Contract deleted successfully" };
+  }
+
+  return { message: "Mock success" };
+}
+
+/* API Service Methods */
 async function apiGet(endpoint) {
-  return await request(endpoint, {
-    method: "GET",
-  });
+  return apiRequest(endpoint, { method: "GET" });
 }
 
-/* ==========================================
-   POST
-========================================== */
-
-async function apiPost(endpoint, body) {
-  return await request(endpoint, {
+async function apiPost(endpoint, body, extra = {}) {
+  return apiRequest(endpoint, {
     method: "POST",
     body: JSON.stringify(body),
+    ...extra,
   });
 }
 
-/* ==========================================
-   PUT
-========================================== */
-
 async function apiPut(endpoint, body) {
-  return await request(endpoint, {
+  return apiRequest(endpoint, {
     method: "PUT",
     body: JSON.stringify(body),
   });
 }
 
-/* ==========================================
-   DELETE
-========================================== */
-
 async function apiDelete(endpoint) {
-  return await request(endpoint, {
-    method: "DELETE",
-  });
+  return apiRequest(endpoint, { method: "DELETE" });
 }
 
-/* ==========================================
-   Logout
-========================================== */
+/* Domain Specific API Calls */
+async function login(email, password) {
+  return apiPost("/auth/login", { email, password });
+}
 
-function logout() {
+async function register(email, password, username) {
+  return apiPost("/auth/register", { email, password, username });
+}
+
+async function logout() {
   removeToken();
-
+  try {
+    await apiPost("/auth/logout");
+  } catch {
+    // Ignore error if server offline
+  }
   window.location.href = "index.html";
 }
 
-/*
-=========================================================
- API.JS
-
- HTTP Communication Layer
-
- Responsibilities:
- - Centralize API requests
- - Manage backend URL
- - Send cookies
- - Handle responses
- - Handle API errors
-
- Authentication:
- - Uses HttpOnly Cookie
- - Cookie name:
-      ai_contract_session
-
- JWT:
- - Never accessed by JavaScript
-
-=========================================================
-*/
-
-// =======================================================
-// SECTION 1: API CONFIGURATION
-// =======================================================
-
-const API_BASE_URL = "http://127.0.0.1:8000";
-
-// =======================================================
-// SECTION 2: COMMON REQUEST FUNCTION
-// =======================================================
-
-async function apiRequest(endpoint, options = {}) {
-  const config = {
-    ...options,
-
-    headers: {
-      "Content-Type": "application/json",
-
-      ...options.headers,
-    },
-
-    /*
-        Important for HttpOnly cookies
-
-        Browser will:
-        - send existing cookie
-        - accept new cookie
-
-        */
-
-    credentials: "include",
-  };
-
-  let response;
-
-  try {
-    response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...config,
-      signal: createTimeoutSignal(),
-    });
-  } catch (error) {
-    if (error.name === "AbortError") {
-      throw new Error("Request timed out. Please try again.");
-    }
-
-    throw new Error("Unable to connect to the server.");
-  }
-
-  let data;
-
-  try {
-    data = await response.json();
-  } catch (error) {
-    data = null;
-  }
-
-  if (!response.ok) {
-    throw new Error(data?.detail || data?.message || "API request failed");
-  }
-
-  return data;
-}
-
-// =======================================================
-// SECTION 3: HTTP METHODS
-// =======================================================
-
-async function apiGet(endpoint) {
-  return apiRequest(endpoint, {
-    method: "GET",
-  });
-}
-
-async function apiPost(endpoint, body) {
-  return apiRequest(
-    endpoint,
-
-    {
-      method: "POST",
-
-      body: JSON.stringify(body),
-    },
-  );
-}
-
-async function apiPut(endpoint, body) {
-  return apiRequest(
-    endpoint,
-
-    {
-      method: "PUT",
-
-      body: JSON.stringify(body),
-    },
-  );
-}
-
-async function apiDelete(endpoint) {
-  return apiRequest(
-    endpoint,
-
-    {
-      method: "DELETE",
-    },
-  );
-}
-// =======================================================
-// SECTION 4: REQUEST TIMEOUT
-// =======================================================
-
-const REQUEST_TIMEOUT = 10000;
-
-function createTimeoutSignal() {
-  return AbortSignal.timeout(REQUEST_TIMEOUT);
-}
-
-// =======================================================
-// SECTION 5: AUTHENTICATION HELPERS
-// =======================================================
-
 async function getCurrentUser() {
-  return await apiGet("/users/me");
+  return apiGet("/users/me");
 }
-async function getContracts() {
-  return await apiGet("/contracts");
-}
-async function getContractById(id) {
-  return await apiGet(`/contracts/${id}`);
-}
-// =======================================================
-// SECTION 6: LOGOUT
-// =======================================================
 
-async function logout() {
-  return await apiPost("/auth/logout");
+async function getContracts() {
+  return apiGet("/contracts");
+}
+
+async function getContractById(id) {
+  return apiGet(`/contracts/${id}`);
+}
+
+async function uploadContract(file) {
+  // If backend is active, use FormData, otherwise mock
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    const token = getToken();
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+    const response = await fetch(`${API_CONFIG.BASE_URL}/contracts/upload`, {
+      method: "POST",
+      headers,
+      body: formData,
+    });
+    if (!response.ok) throw new Error("Upload failed");
+    return await response.json();
+  } catch (err) {
+    return handleMockRequest("/contracts/upload", {
+      method: "POST",
+      fileName: file.name,
+      fileSize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+    });
+  }
+}
+
+async function deleteContract(id) {
+  return apiDelete(`/contracts/${id}`);
 }

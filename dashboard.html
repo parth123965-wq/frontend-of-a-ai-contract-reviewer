@@ -2,165 +2,202 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="AI Contract Reviewer Dashboard - Overview of analyzed legal contracts and risk alerts." />
+    <title>AI Contract Reviewer - Workspace Dashboard</title>
 
-    <title>AI Contract Reviewer - Dashboard</title>
-
-    <!-- Global Theme -->
+    <!-- Global Theme & Components -->
     <link rel="stylesheet" href="./css/theme.css" />
-
-    <!-- Dashboard Style -->
     <link rel="stylesheet" href="./css/components/button.css" />
     <link rel="stylesheet" href="./css/components/card.css" />
     <link rel="stylesheet" href="./css/components/badge.css" />
+    <link rel="stylesheet" href="./css/components/input.css" />
     <link rel="stylesheet" href="./css/dashboard.css" />
   </head>
 
   <body>
-    <div class="dashboard">
-      <!-- =========================
-         Sidebar
-    ========================== -->
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
 
+    <!-- Upload Contract Modal -->
+    <div id="uploadModal" class="modal-backdrop">
+      <div class="modal-content">
+        <div class="card-header">
+          <h2 class="card-title">Upload Legal Contract</h2>
+          <button id="closeUploadModalBtn" class="btn btn-ghost btn-sm" aria-label="Close modal">✕</button>
+        </div>
+        <form id="uploadForm">
+          <div class="file-input" id="fileDropZone">
+            <div class="file-drop-content">
+              <span class="file-icon">📄</span>
+              <p><strong>Click to browse</strong> or drag & drop contract file</p>
+              <span class="file-hint">Supports PDF, DOCX, TXT (Max 25MB)</span>
+            </div>
+            <input type="file" id="contractFileInput" accept=".pdf,.docx,.txt" style="display: none;" />
+          </div>
+          <div id="selectedFileName" class="selected-file-info" style="display: none;"></div>
+
+          <div class="card-footer" style="padding-top: 1.5rem;">
+            <button type="button" id="cancelUploadBtn" class="btn btn-ghost">Cancel</button>
+            <button type="submit" id="uploadSubmitBtn" class="btn btn-primary" disabled>Analyze Contract</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="dashboard">
+      <!-- Sidebar -->
       <aside class="sidebar">
         <div class="sidebar-brand">
           <div class="sidebar-logo">AI</div>
-
-          <h2>Contract AI</h2>
+          <h2 class="sidebar-title">Contract AI</h2>
         </div>
 
         <nav class="sidebar-nav">
-          <a href="#" class="nav-item active"> Dashboard </a>
-
-          <a href="#" class="nav-item"> Contracts </a>
-
-          <a href="#" class="nav-item"> Upload Contract </a>
-
-          <a href="#" class="nav-item"> Analysis </a>
-
-          <a href="#" class="nav-item"> Settings </a>
+          <a href="dashboard.html" class="nav-item active">
+            <span class="nav-icon">📊</span> Dashboard
+          </a>
+          <a href="#recent-contracts" class="nav-item">
+            <span class="nav-icon">📁</span> Contracts
+          </a>
+          <button type="button" id="sidebarUploadBtn" class="nav-item nav-button">
+            <span class="nav-icon">📤</span> Upload Contract
+          </button>
+          <a href="#ai-analysis" class="nav-item">
+            <span class="nav-icon">⚡</span> Analysis
+          </a>
+          <a href="#" class="nav-item" onclick="alert('Settings panel coming soon!')">
+            <span class="nav-icon">⚙️</span> Settings
+          </a>
         </nav>
+
+        <div class="sidebar-footer">
+          <button id="sidebarLogoutBtn" class="btn btn-ghost btn-block">
+            🚪 Logout
+          </button>
+        </div>
       </aside>
 
-      <!-- =========================
-         Main Content
-    ========================== -->
-
+      <!-- Main Workspace -->
       <main class="dashboard-main">
-        <!-- Navbar -->
-
+        <!-- Top Navigation Header -->
         <header class="dashboard-header">
           <div class="page-title">
             <h1>Dashboard</h1>
-
             <p>Overview of your contract intelligence workspace</p>
           </div>
 
           <div class="navbar-actions">
-            <button class="notification-btn">🔔</button>
+            <button class="notification-btn" title="Notifications" aria-label="Notifications">
+              🔔 <span class="notification-badge"></span>
+            </button>
 
             <div class="user-profile">
-              <div class="avatar">P</div>
-
-              <span> User </span>
+              <div class="avatar" id="user-avatar">P</div>
+              <span id="username" class="username-text">User</span>
             </div>
+
+            <button id="logoutButton" class="btn btn-outline btn-sm">Logout</button>
           </div>
         </header>
 
-        <!-- Dashboard Content -->
-
+        <!-- Stats Overview Cards Grid -->
         <section class="stats-grid">
-          <!-- Statistics Cards -->
-
-          <div class="card stat-card">
-            <h3>Total Contracts</h3>
-
-            <strong id="total-contracts"> -- </strong>
+          <div class="card stat-card card-hover">
+            <span class="stat-label">Total Contracts</span>
+            <strong id="total-contracts" class="stat-value">--</strong>
           </div>
 
-          <div class="card stat-card">
-            <span class="badge status-completed"> Completed </span>
-
-            <strong id="completed-reviews"> -- </strong>
-          </div>
-
-          <div class="card stat-card">
-            <span class="badge badge-risk-high"> High Risk </span>
-
-            <strong id="risk-alerts"> -- </strong>
-          </div>
-
-          <div class="card stat-card">
-            <span class="badge status-processing"> Processing </span>
-
-            <strong id="processing-contracts"> -- </strong>
-          </div>
-
-          <!-- Recent Contracts -->
-
-          <section class="contract-section">
-            <div class="section-header">
-              <h2>Recent Contracts</h2>
-
-              <button class="btn btn-outline btn-sm">View All</button>
+          <div class="card stat-card card-hover">
+            <div class="stat-header">
+              <span class="stat-label">Reviews</span>
+              <span class="badge status-completed">Completed</span>
             </div>
-            <div class="card contract-table-card">
-              <table class="contract-table">
-                <thead>
-                  <tr>
-                    <th>Contract</th>
+            <strong id="completed-reviews" class="stat-value">--</strong>
+          </div>
 
-                    <th>Status</th>
-
-                    <th>Risk</th>
-
-                    <th>Date</th>
-
-                    <th>Action</th>
-                  </tr>
-                </thead>
-
-                <tbody id="contract-table-body">
-                  <tr>
-                    <td colspan="5" class="table-loading">
-                      Loading contracts...
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+          <div class="card stat-card card-hover">
+            <div class="stat-header">
+              <span class="stat-label">Alerts</span>
+              <span class="badge badge-risk-high">High Risk</span>
             </div>
-          </section>
+            <strong id="risk-alerts" class="stat-value">--</strong>
+          </div>
 
-          <!-- AI Insight -->
-
-          <section class="ai-panel">
-            <h2>AI Analysis Overview</h2>
-
-            <div class="ai-content">
-              <div>
-                <span> AI Engine </span>
-
-                <strong> Ready </strong>
-              </div>
-
-              <div>
-                <span> Analysis Status </span>
-
-                <strong> Waiting </strong>
-              </div>
-
-              <div>
-                <span> Model </span>
-
-                <strong> Not Started </strong>
-              </div>
+          <div class="card stat-card card-hover">
+            <div class="stat-header">
+              <span class="stat-label">Queue</span>
+              <span class="badge status-processing">Processing</span>
             </div>
-          </section>
+            <strong id="processing-contracts" class="stat-value">--</strong>
+          </div>
+        </section>
+
+        <!-- Contracts Table Section -->
+        <section id="recent-contracts" class="contract-section">
+          <div class="section-header">
+            <h2>Recent Contracts</h2>
+            <div class="table-actions">
+              <input type="text" id="contractSearch" class="input search-input" placeholder="Search contracts..." />
+              <select id="statusFilter" class="input select" style="width: 150px;">
+                <option value="all">All Status</option>
+                <option value="completed">Completed</option>
+                <option value="processing">Processing</option>
+              </select>
+              <button id="openUploadBtn" class="btn btn-primary btn-sm">+ New Upload</button>
+            </div>
+          </div>
+
+          <div class="card contract-table-card">
+            <table class="contract-table">
+              <thead>
+                <tr>
+                  <th>Contract Name</th>
+                  <th>Status</th>
+                  <th>Risk Score</th>
+                  <th>Date Added</th>
+                  <th style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="contract-table-body">
+                <tr>
+                  <td colspan="5" class="table-loading">
+                    Loading workspace contracts...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- AI Engine Overview Section -->
+        <section id="ai-analysis" class="ai-panel card card-glass" style="margin-top: var(--space-8);">
+          <div class="card-header">
+            <h2 class="card-title">⚡ AI Analysis Engine Overview</h2>
+            <span class="badge badge-primary">v2.4 Neural Legal Model</span>
+          </div>
+
+          <div class="ai-content">
+            <div class="ai-stat-box">
+              <span class="ai-stat-label">Engine Status</span>
+              <strong class="ai-stat-value text-success">● Active & Ready</strong>
+            </div>
+
+            <div class="ai-stat-box">
+              <span class="ai-stat-label">Analysis Mode</span>
+              <strong class="ai-stat-value">Automated Risk Scoring</strong>
+            </div>
+
+            <div class="ai-stat-box">
+              <span class="ai-stat-label">Compliance Standard</span>
+              <strong class="ai-stat-value">GDPR & US Commercial Law</strong>
+            </div>
+          </div>
         </section>
       </main>
     </div>
 
+    <!-- Scripts -->
     <script src="./js/api.js"></script>
     <script src="./js/dashboard.js"></script>
   </body>
