@@ -3,6 +3,14 @@
 ========================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
+  if (typeof isAuthenticated === "function" && isAuthenticated()) {
+    const path = window.location.pathname;
+    if (path.endsWith("index.html") || path.endsWith("register.html") || path.endsWith("/")) {
+      window.location.replace("dashboard.html");
+      return;
+    }
+  }
+
   initPasswordToggles();
 
   const loginForm = document.getElementById("login-form");

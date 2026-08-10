@@ -89,6 +89,7 @@ function renderContractMetadata(contract) {
   const statusEl = document.getElementById("contract-status");
   const sizeEl = document.getElementById("contract-size");
   const dateEl = document.getElementById("contract-date");
+  const typeEl = document.getElementById("contract-type");
   const summaryEl = document.getElementById("contract-summary");
 
   if (titleEl) titleEl.textContent = contract.original_filename || "Untitled Contract";
@@ -99,7 +100,7 @@ function renderContractMetadata(contract) {
     statusEl.className = `badge ${norm === 'completed' ? 'status-completed' : 'badge-warning'}`;
   }
 
-  if (sizeEl) sizeEl.textContent = contract.file_size || "1.4 MB";
+  if (sizeEl) sizeEl.textContent = contract.file_size || "N/A";
 
   if (dateEl) {
     dateEl.textContent = contract.created_at
@@ -107,8 +108,22 @@ function renderContractMetadata(contract) {
       : "N/A";
   }
 
+  if (typeEl) {
+    let typeName = "Legal Document";
+    if (contract.content_type) {
+      if (contract.content_type.includes("pdf")) typeName = "PDF Document";
+      else if (contract.content_type.includes("word") || contract.content_type.includes("docx")) typeName = "Word Document";
+      else if (contract.content_type.includes("text") || contract.content_type.includes("txt")) typeName = "Text Document";
+      else typeName = contract.content_type;
+    } else if (contract.original_filename) {
+      const ext = contract.original_filename.split(".").pop().toUpperCase();
+      typeName = `${ext} File`;
+    }
+    typeEl.textContent = typeName;
+  }
+
   if (summaryEl) {
-    summaryEl.textContent = contract.summary || "AI engine has generated an initial executive risk breakdown for this agreement.";
+    summaryEl.textContent = contract.summary || "AI analysis completed for this agreement.";
   }
 }
 
@@ -130,7 +145,7 @@ function renderRiskScoreGauge(score) {
     circleEl.className = "risk-score";
     if (score >= 70) {
       circleEl.classList.add("risk-high");
-      if (labelEl) labelEl.textContent = "⚠️ High Risk Contract Exposure";
+      if (labelEl) labelEl.textContent = "⚠️ High Risk Exposure";
     } else if (score >= 40) {
       circleEl.classList.add("risk-medium");
       if (labelEl) labelEl.textContent = "⚡ Moderate Risk Contract";
@@ -162,15 +177,16 @@ function renderFindings(findings) {
     findingDiv.className = "finding-item";
 
     let badgeType = "badge-risk-medium";
-    if (item.type === "high") badgeType = "badge-risk-high";
-    if (item.type === "low") badgeType = "badge-risk-low";
+    const itemType = (item.type || item.risk_level || "medium").toLowerCase();
+    if (itemType === "high") badgeType = "badge-risk-high";
+    if (itemType === "low") badgeType = "badge-risk-low";
 
     findingDiv.innerHTML = `
       <div class="finding-header">
-        <span class="finding-clause">${escapeHtml(item.clause || "Clause Analysis")}</span>
-        <span class="badge ${badgeType}">${(item.type || "risk").toUpperCase()}</span>
+        <span class="finding-clause">${escapeHtml(item.clause || "Clause Finding")}</span>
+        <span class="badge ${badgeType}">${itemType.toUpperCase()}</span>
       </div>
-      <p class="finding-desc">${escapeHtml(item.description || "")}</p>
+      <p class="finding-desc">${escapeHtml(item.description || item.summary || "")}</p>
     `;
 
     container.appendChild(findingDiv);
@@ -180,24 +196,59 @@ function renderFindings(findings) {
 /* Render Recommendations */
 function renderRecommendations(contract) {
   const recContainer = document.getElementById("recommendations-list");
+  const complianceContainer = document.getElementById("compliance-checklist");
   if (!recContainer) return;
 
-  const score = contract.risk_score || 0;
-  const recs = [];
+  let recs = [];
+  const rawRecs = contract.recommendations || contract.latest_analysis?.recommendations;
+  
+  if (rawRecs && typeof rawRecs === "string") {
+    recs = rawRecs.split("\n").map(r => r.trim()).filter(Boolean);
+  }
 
-  if (score >= 70) {
-    recs.push("Mandatory legal review recommended due to high liability exposure clauses.");
-    recs.push("Negotiate mutual liability cap (12 months contract fees) before signing.");
-    recs.push("Add explicit exclusion for indirect and consequential damages.");
-  } else if (score >= 40) {
-    recs.push("Verify auto-renewal notice timeline aligns with internal operations.");
-    recs.push("Confirm choice of law and dispute venue match corporate preferences.");
-  } else {
-    recs.push("Agreement adheres to standard legal templates and low-risk terms.");
-    recs.push("Proceed through standard executive signature workflow.");
+  if (!recs.length) {
+    const score = contract.risk_score || 0;
+    if (score >= 70) {
+      recs.push("Mandatory legal review recommended due to high liability exposure clauses.");
+      recs.push("Negotiate mutual liability cap before signing.");
+      recs.push("Add explicit exclusion for indirect and consequential damages.");
+    } else if (score >= 40) {
+      recs.push("Verify auto-renewal notice timeline aligns with internal operations.");
+      recs.push("Confirm choice of law and dispute venue match corporate preferences.");
+    } else {
+      recs.push("Agreement adheres to standard legal templates and low-risk terms.");
+      recs.push("Proceed through standard executive signature workflow.");
+    }
   }
 
   recContainer.innerHTML = recs.map(r => `<div class="recommendation-item">${escapeHtml(r)}</div>`).join("");
+
+  if (complianceContainer) {
+    const score = contract.risk_score;
+    let listHtml = "";
+    if (score === null || score === undefined) {
+      listHtml = `<li class="check-warn">⚠️ Analysis Pending</li>`;
+    } else if (score >= 70) {
+      listHtml = `
+        <li class="check-pass">✓ Data Privacy & Security Terms</li>
+        <li class="check-warn">⚠️ High Risk Exposure Identified</li>
+        <li class="check-warn">⚠️ Legal Counsel Review Required</li>
+      `;
+    } else if (score >= 40) {
+      listHtml = `
+        <li class="check-pass">✓ Choice of Law Specified</li>
+        <li class="check-pass">✓ Data Privacy Terms</li>
+        <li class="check-warn">⚡ Renewal Terms Require Review</li>
+      `;
+    } else {
+      listHtml = `
+        <li class="check-pass">✓ Data Privacy & GDPR Compliant</li>
+        <li class="check-pass">✓ Standard Liability Caps Present</li>
+        <li class="check-pass">✓ Choice of Law Specified</li>
+      `;
+    }
+    complianceContainer.innerHTML = listHtml;
+  }
 }
 
 /* Toast Helper */

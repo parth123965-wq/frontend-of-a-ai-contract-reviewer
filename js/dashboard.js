@@ -35,6 +35,16 @@ function renderUserInfo(user) {
 
   if (usernameEl) usernameEl.textContent = displayName;
   if (avatarEl) avatarEl.textContent = displayName.charAt(0).toUpperCase();
+
+  const settingsUsername = document.getElementById("settingsUsername");
+  const settingsEmail = document.getElementById("settingsEmail");
+  const settingsApiUrl = document.getElementById("settingsApiUrl");
+  const settingsAuthToken = document.getElementById("settingsAuthToken");
+
+  if (settingsUsername) settingsUsername.value = displayName;
+  if (settingsEmail) settingsEmail.value = user.email || "";
+  if (settingsApiUrl) settingsApiUrl.value = API_CONFIG.BASE_URL;
+  if (settingsAuthToken) settingsAuthToken.value = getToken() || "Session Cookie Active";
 }
 
 /* Initialize Dashboard Event Listeners */

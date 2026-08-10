@@ -242,11 +242,11 @@
               <div class="form-group-grid" style="margin-top: var(--space-4); display: grid; gap: var(--space-4);">
                 <div class="form-group">
                   <label class="info-label" for="settingsUsername">Display Name</label>
-                  <input type="text" id="settingsUsername" class="input" value="Parth" placeholder="Your Name" />
+                  <input type="text" id="settingsUsername" class="input" placeholder="Your Name" />
                 </div>
                 <div class="form-group">
                   <label class="info-label" for="settingsEmail">Email Address</label>
-                  <input type="email" id="settingsEmail" class="input" value="parth@contractai.io" placeholder="name@company.com" />
+                  <input type="email" id="settingsEmail" class="input" placeholder="name@company.com" readonly style="opacity: 0.8;" />
                 </div>
               </div>
             </article>
@@ -259,11 +259,11 @@
               <div class="form-group-grid" style="margin-top: var(--space-4); display: grid; gap: var(--space-4);">
                 <div class="form-group">
                   <label class="info-label" for="settingsApiUrl">Backend Base URL</label>
-                  <input type="text" id="settingsApiUrl" class="input" value="http://127.0.0.1:8000" />
+                  <input type="text" id="settingsApiUrl" class="input" placeholder="http://127.0.0.1:8000" />
                 </div>
                 <div class="form-group">
                   <label class="info-label" for="settingsAuthToken">Active Access Token</label>
-                  <input type="text" id="settingsAuthToken" class="input" value="mock_access_token_xyz123" readonly style="opacity: 0.7;" />
+                  <input type="text" id="settingsAuthToken" class="input" placeholder="No active token" readonly style="opacity: 0.7;" />
                 </div>
               </div>
             </article>
@@ -297,6 +297,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="./js/contracts.js"></script>
     <script src="./js/api.js"></script>
     <script src="./js/dashboard.js"></script>
   </body>
