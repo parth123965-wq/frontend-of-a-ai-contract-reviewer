@@ -252,11 +252,15 @@ function applyTableFilters() {
   const statusFilter = document.getElementById("statusFilter");
 
   const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : "";
-  const selectedStatus = statusFilter ? statusFilter.value : "all";
+  const selectedStatus = statusFilter ? statusFilter.value.toLowerCase().trim() : "all";
 
   const filtered = allContracts.filter((contract) => {
-    const matchesSearch = contract.original_filename?.toLowerCase().includes(searchTerm);
-    const matchesStatus = selectedStatus === "all" || contract.status === selectedStatus;
+    const filename = (contract.original_filename || contract.filename || "").toLowerCase();
+    const matchesSearch = !searchTerm || filename.includes(searchTerm);
+    
+    const status = (contract.status || "").toLowerCase();
+    const matchesStatus = selectedStatus === "all" || status === selectedStatus;
+    
     return matchesSearch && matchesStatus;
   });
 

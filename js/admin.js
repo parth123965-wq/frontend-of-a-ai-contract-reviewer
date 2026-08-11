@@ -3,12 +3,29 @@
    Handles Admin Panel Interactions & API Integration
 ========================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
-  // Check Authentication & Admin Privileges
-  const user = JSON.parse(localStorage.getItem(API_CONFIG.USER_KEY) || "{}");
-  if (!isAuthenticated() || !user.is_admin) {
-    // If not authenticated as admin, prompt/redirect
-    console.warn("Non-admin user accessed admin panel");
+document.addEventListener("DOMContentLoaded", async () => {
+  // 1. Strict Authentication & Admin Access Check
+  if (typeof isAuthenticated === "function" && !isAuthenticated()) {
+    window.location.replace("index.html");
+    return;
+  }
+
+  let user = JSON.parse(localStorage.getItem(API_CONFIG.USER_KEY) || "{}");
+
+  // Validate session live from backend if possible
+  if (typeof getCurrentUser === "function") {
+    try {
+      user = await getCurrentUser();
+    } catch (e) {
+      window.location.replace("index.html");
+      return;
+    }
+  }
+
+  if (!user || !user.is_admin) {
+    alert("Access Denied: You need Administrator privileges to access the Admin Control Panel.");
+    window.location.replace("dashboard.html");
+    return;
   }
 
   // State Management

@@ -268,6 +268,10 @@ async function deleteContract(id) {
   return apiDelete(`/contracts/${id}`);
 }
 
+async function askQuestionOnContract(contractId, question) {
+  return apiPost(`/contracts/${contractId}/ask`, { question });
+}
+
 /* Admin API Methods */
 async function adminLogin(email, password) {
   const res = await apiPost("/admin/auth/login", { email, password });

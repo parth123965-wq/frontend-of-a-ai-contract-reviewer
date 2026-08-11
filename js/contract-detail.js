@@ -62,6 +62,46 @@ function initDetailEvents(contractId) {
       }
     });
   }
+
+  // RAG Q&A Form Listener
+  const ragForm = document.getElementById("rag-question-form");
+  const ragInput = document.getElementById("rag-input");
+  const ragSubmitBtn = document.getElementById("rag-submit-btn");
+  const chatMessages = document.getElementById("chat-messages");
+
+  if (ragForm) {
+    ragForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const question = ragInput ? ragInput.value.trim() : "";
+      if (!question) return;
+
+      // Append User Question
+      const userMsgDiv = document.createElement("div");
+      userMsgDiv.style.cssText = "padding: 0.5rem 0.75rem; border-radius: 6px; background: var(--color-primary-muted); color: var(--color-primary-hover); margin-bottom: 0.5rem; text-align: right;";
+      userMsgDiv.textContent = `👤 ${question}`;
+      chatMessages.appendChild(userMsgDiv);
+
+      ragInput.value = "";
+      ragSubmitBtn.disabled = true;
+
+      // Pending Bot Msg
+      const botMsgDiv = document.createElement("div");
+      botMsgDiv.style.cssText = "padding: 0.5rem 0.75rem; border-radius: 6px; background: var(--color-surface-hover); margin-bottom: 0.5rem;";
+      botMsgDiv.textContent = "🤖 Searching vector store & analyzing context...";
+      chatMessages.appendChild(botMsgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      try {
+        const res = await askQuestionOnContract(contractId, question);
+        botMsgDiv.innerHTML = `🤖 <strong>AI Answer:</strong><br/>${escapeHtml(res.answer || "No response generated.")}`;
+      } catch (err) {
+        botMsgDiv.innerHTML = `<span style="color: var(--color-danger);">⚠️ Error answering question: ${escapeHtml(err.message)}</span>`;
+      } finally {
+        ragSubmitBtn.disabled = false;
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    });
+  }
 }
 
 /* Fetch & Render Contract Details */

@@ -77,6 +77,40 @@ function initPasswordToggles() {
   }
 }
 
+let currentLoginMode = "user"; // "user" or "admin"
+
+/* Mode Toggle Handlers */
+document.addEventListener("DOMContentLoaded", () => {
+  const userBtn = document.getElementById("userModeBtn");
+  const adminBtn = document.getElementById("adminModeBtn");
+  const titleEl = document.getElementById("login-title");
+  const subtitleEl = document.getElementById("login-subtitle");
+  const footerEl = document.getElementById("auth-footer");
+  const submitBtn = document.getElementById("loginButton");
+
+  if (userBtn && adminBtn) {
+    userBtn.addEventListener("click", () => {
+      currentLoginMode = "user";
+      userBtn.className = "btn btn-sm btn-primary";
+      adminBtn.className = "btn btn-sm btn-ghost";
+      if (titleEl) titleEl.textContent = "Welcome Back";
+      if (subtitleEl) subtitleEl.textContent = "Login to access your contract intelligence workspace";
+      if (footerEl) footerEl.style.display = "block";
+      if (submitBtn) submitBtn.textContent = "Sign In";
+    });
+
+    adminBtn.addEventListener("click", () => {
+      currentLoginMode = "admin";
+      adminBtn.className = "btn btn-sm btn-primary";
+      userBtn.className = "btn btn-sm btn-ghost";
+      if (titleEl) titleEl.textContent = "Admin Control Panel Login";
+      if (subtitleEl) subtitleEl.textContent = "Authenticate with administrator credentials to access platform controls";
+      if (footerEl) footerEl.style.display = "none";
+      if (submitBtn) submitBtn.textContent = "Sign In as Admin";
+    });
+  }
+});
+
 /* Input Validations */
 function validateEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -106,26 +140,32 @@ async function handleLoginSubmit(event) {
   try {
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = "Signing In...";
+      submitBtn.textContent = currentLoginMode === "admin" ? "Authenticating Admin..." : "Signing In...";
     }
 
-    const loginRes = await login(email, password);
-    showToast("Login successful! Redirecting...", "success");
-
-    const savedUser = JSON.parse(localStorage.getItem(API_CONFIG.USER_KEY) || "{}");
-
-    setTimeout(() => {
-      if (savedUser && savedUser.is_admin) {
+    if (currentLoginMode === "admin") {
+      await adminLogin(email, password);
+      showToast("Admin login successful! Redirecting to Admin Panel...", "success");
+      setTimeout(() => {
         window.location.href = "admin.html";
-      } else {
-        window.location.href = "dashboard.html";
-      }
-    }, 600);
+      }, 600);
+    } else {
+      await login(email, password);
+      showToast("Login successful! Redirecting...", "success");
+      const savedUser = JSON.parse(localStorage.getItem(API_CONFIG.USER_KEY) || "{}");
+      setTimeout(() => {
+        if (savedUser && savedUser.is_admin) {
+          window.location.href = "admin.html";
+        } else {
+          window.location.href = "dashboard.html";
+        }
+      }, 600);
+    }
   } catch (error) {
     showToast(error.message || "Failed to sign in. Please try again.", "error");
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.textContent = "Sign In";
+      submitBtn.textContent = currentLoginMode === "admin" ? "Sign In as Admin" : "Sign In";
     }
   }
 }
