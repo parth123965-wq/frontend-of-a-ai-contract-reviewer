@@ -109,11 +109,17 @@ async function handleLoginSubmit(event) {
       submitBtn.textContent = "Signing In...";
     }
 
-    await login(email, password);
+    const loginRes = await login(email, password);
     showToast("Login successful! Redirecting...", "success");
 
+    const savedUser = JSON.parse(localStorage.getItem(API_CONFIG.USER_KEY) || "{}");
+
     setTimeout(() => {
-      window.location.href = "dashboard.html";
+      if (savedUser && savedUser.is_admin) {
+        window.location.href = "admin.html";
+      } else {
+        window.location.href = "dashboard.html";
+      }
     }, 600);
   } catch (error) {
     showToast(error.message || "Failed to sign in. Please try again.", "error");

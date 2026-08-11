@@ -268,4 +268,68 @@ async function deleteContract(id) {
   return apiDelete(`/contracts/${id}`);
 }
 
+/* Admin API Methods */
+async function adminLogin(email, password) {
+  const res = await apiPost("/admin/auth/login", { email, password });
+  if (res && res.access_token) {
+    saveToken(res.access_token);
+  }
+  if (res && res.user) {
+    localStorage.setItem(API_CONFIG.USER_KEY, JSON.stringify(res.user));
+  }
+  return res;
+}
+
+async function adminGetStats() {
+  return apiGet("/admin/dashboard/stats");
+}
+
+async function adminGetUsers(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  return apiGet(`/admin/users${query ? "?" + query : ""}`);
+}
+
+async function adminGetUserDetail(userId) {
+  return apiGet(`/admin/users/${userId}`);
+}
+
+async function adminUpdateUserStatus(userId, isActive) {
+  return apiRequest(`/admin/users/${userId}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ is_active: isActive }),
+  });
+}
+
+async function adminUpdateUserRole(userId, isAdmin) {
+  return apiRequest(`/admin/users/${userId}/role`, {
+    method: "PATCH",
+    body: JSON.stringify({ is_admin: isAdmin }),
+  });
+}
+
+async function adminDeleteUser(userId) {
+  return apiDelete(`/admin/users/${userId}`);
+}
+
+async function adminGetContracts(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  return apiGet(`/admin/contracts${query ? "?" + query : ""}`);
+}
+
+async function adminGetContractDetail(contractId) {
+  return apiGet(`/admin/contracts/${contractId}`);
+}
+
+async function adminUpdateContractStatus(contractId, status) {
+  return apiRequest(`/admin/contracts/${contractId}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status: status }),
+  });
+}
+
+async function adminDeleteContract(contractId) {
+  return apiDelete(`/admin/contracts/${contractId}`);
+}
+
+
 

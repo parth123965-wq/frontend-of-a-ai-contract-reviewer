@@ -36,6 +36,11 @@ function renderUserInfo(user) {
   if (usernameEl) usernameEl.textContent = displayName;
   if (avatarEl) avatarEl.textContent = displayName.charAt(0).toUpperCase();
 
+  const adminPanelLink = document.getElementById("adminPanelLink");
+  if (adminPanelLink && user.is_admin) {
+    adminPanelLink.style.display = "block";
+  }
+
   const settingsUsername = document.getElementById("settingsUsername");
   const settingsEmail = document.getElementById("settingsEmail");
   const settingsApiUrl = document.getElementById("settingsApiUrl");
